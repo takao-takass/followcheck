@@ -1,0 +1,13 @@
+# Twitter API
+CONSUMER_KEY = ""
+CONSUMER_SECRET = ""
+ACCESS_TOKEN = ""
+ACCESS_TOKEN_SECRET = ""
+
+# データベース
+DB_USER = ""
+DB_PASSWORD = ""
+DB_HOST = ""
+DB_PORT = 
+DB_DATABASE = "followcheck"
+DB_CHARSET = "utf8mb4"
