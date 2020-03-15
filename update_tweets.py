@@ -1,5 +1,5 @@
-### ユーザの全てのツイートを取得する
-### 2020-03-14  たかお
+### ユーザの新しいツイートを取得する
+### 2020-03-15  たかお
 
 import sys,json, MySQLdb,config
 from model.user import User
@@ -33,30 +33,40 @@ while requests_max > 0:
         # 対象のユーザを取得する
         print("ツイート取得対象のユーザを確認しています...")
         cursor.execute(
-            " SELECT A.user_id, B.disp_name, A.continue_tweet_id " \
+            " SELECT A.user_id, B.disp_name " \
             " FROM tweet_take_users A " \
             " INNER JOIN relational_users B " \
             " ON A.user_id = B.user_id " \
             " WHERE A.service_user_id = '"+serviceUserId+"'" \
-            " AND A.status IN ('0','1') "\
+            " AND A.status IN ('5','6') "\
             " ORDER BY A.status desc LIMIT 1 "
         )
 
         if cursor.rowcount == 0:
-            print("ツイートは全て取得しました。")
+            print("ツイートは更新しました。")
             break
 
         for row in cursor:
             userId = row['user_id']
             dispName = row['disp_name']
-            continueTweetId= row['continue_tweet_id']
+        
+        print("ユーザの最終ツイートIDを確認しています...")
+        cursor.execute(
+            " SELECT A.tweet_id " \
+            " FROM tweets A " \
+            " WHERE A.service_user_id = '"+serviceUserId+"'" \
+            " AND A.user_id = '"+userId+"' "\
+            " ORDER BY A.tweeted_datetime desc LIMIT 1 "
+        )
+        for row in cursor:
+            continueTweetId= row['tweet_id']
 
         # APIにリクエストを送信してツイートを取得する
         print(userId+"のツイートを上限200件で取得しています...")
         res = twitter.get("https://api.twitter.com/1.1/statuses/user_timeline.json", params = {
             'screen_name':dispName,
             'count':200,
-            'max_id':continueTweetId,
+            'since_id':continueTweetId,
             'include_rts':False
         })
         statuses = json.loads(res.text)
@@ -164,8 +174,8 @@ while requests_max > 0:
         else:
             cursor.execute(
                 " UPDATE tweet_take_users" \
-                " SET status = '1'" \
-                " ,continue_tweet_id = '"+tweets[len(tweets)-1]['tweet_id']+"'" \
+                " SET status = '6'" \
+                " ,continue_tweet_id = 'null'" \
                 " ,update_datetime = NOW()" \
                 " WHERE service_user_id = '"+serviceUserId+"'" \
                 " AND user_id = '"+userId+"'"
@@ -184,6 +194,49 @@ while requests_max > 0:
     finally:
         cursor.close()
         con.close()
+
+
+print("全てのユーザが最新化されたらステータスを最新化待ちに更新します。")
+con = MySQLdb.connect(
+    host = config.DB_HOST,
+    port = config.DB_PORT,
+    db = config.DB_DATABASE,
+    user = config.DB_USER,
+    passwd = config.DB_PASSWORD,
+    charset = config.DB_CHARSET
+)
+con.autocommit(False)
+cursor = con.cursor(MySQLdb.cursors.DictCursor)
+
+try:
+
+    cursor.execute(
+        " SELECT A.user_id " \
+        " FROM tweet_take_users A " \
+        " WHERE A.service_user_id = '"+serviceUserId+"'" \
+        " AND A.status NOT IN ('9','D') "\
+        " ORDER BY A.status desc LIMIT 1 "
+    )
+    if cursor.rowcount == 0:
+        print("全てのユーザが完了しているため、最新化待ちに更新します。")
+        cursor.execute(
+            " UPDATE tweet_take_users " \
+            " SET status = '5' " \
+            "    ,update_datetime = NOW() " \
+            " WHERE service_user_id = '"+serviceUserId+"'" \
+            " AND status = '9' "\
+        )
+        con.commit()
+
+except Exception as e:
+    con.rollback()
+    print("ERROR: ",e)
+    print("エラーが発生しました。処理を終了します。")
+    sys.exit()
+finally:
+    cursor.close()
+    con.close()
+
 
 print("APIリクエスト残数："+str(requests_max))
 print("処理は終了しました。")
