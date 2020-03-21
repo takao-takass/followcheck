@@ -82,12 +82,39 @@ while requests_max > 0:
             if 'extended_entities' in statuse:
 
                 for media in statuse['extended_entities']['media']:
-                    tweetMedias.append({
-                        'tweet_id':statuse['id_str'],
-                        'url':media['media_url'],
-                        'type':media['type'],
-                        'sizes':','.join(media['sizes'])
-                    })
+
+                    # 動画メディア
+                    if 'video' == media['type']:
+                        videoInfo = media['video_info']
+
+                        # ビットレートが一番高い動画URLを取得する
+                        videoMedia = {}
+                        for variant in videoInfo['variants']:
+                            if not 'bitrate' in variant:
+                                continue
+                            if (not 'bitrate' in videoMedia) or (videoMedia['bitrate'] < variant['bitrate']):
+                                videoMedia = {
+                                    'bitrate':variant['bitrate'],
+                                    'contentType':variant['content_type'],
+                                    'url':variant['url']
+                                }
+                        tweetMedias.append({
+                            'tweet_id':statuse['id_str'],
+                            'url':videoMedia['url'],
+                            'type':media['type'],
+                            'sizes':'',
+                            'bitrate':videoMedia['bitrate']
+                        })
+                    
+                    # 画像メディアとその他のメディア
+                    else:
+                        tweetMedias.append({
+                            'tweet_id':statuse['id_str'],
+                            'url':media['media_url'],
+                            'type':media['type'],
+                            'sizes':','.join(media['sizes']),
+                            'bitrate':''
+                        })
 
         # ツイートをDBに登録
         print(str(len(tweets))+"件のツイートを登録しています...")
@@ -131,6 +158,7 @@ while requests_max > 0:
                 " 	,url" \
                 " 	,type" \
                 " 	,sizes" \
+                " 	,bitrate" \
                 " 	,file_name" \
                 " 	,directory_path" \
                 " 	,create_datetime" \
@@ -140,6 +168,7 @@ while requests_max > 0:
                 " 	,'"+media['url']+"'" \
                 " 	,'"+media['type']+"'" \
                 " 	,'"+media['sizes']+"'" \
+                " 	,'"+str(media['bitrate'])+"'" \
                 " 	,null" \
                 " 	,null" \
                 " 	,NOW()" \

@@ -48,17 +48,18 @@ try:
     count = 0
     for download in downloads:
 
-        # ファイル名
         count += 1
+
+        # URLからドメイン･階層とパラメータを除去してファイル名を作る
         splitedUrl = download['url'].split('/')
-        filename = splitedUrl[len(splitedUrl)-1]
+        filename = splitedUrl[len(splitedUrl)-1].split('?')[0]
 
         # ディレクトリパス（無ければ作る）
         directory = config.STRAGE_MEDIAS_PATH + download['disp_name'] + '/'
         if not os.path.exists(directory):
             os.mkdir(directory)
 
-        # 対応サイズの判定
+        # 画像ファイルの対応サイズを判定
         size = "thumb"
         if "large" in download['sizes']:
             size = "large"
