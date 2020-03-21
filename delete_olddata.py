@@ -40,14 +40,6 @@ try:
         " 	WHERE EI.exec_count < (SELECT MAX(exec_count) -3 FROM exec_id_manage) " \
         " ) "
     )
-
-    print('古い実行IDを削除しています...')
-    cursor.execute(" SELECT (MAX(exec_count) -3) AS exec_ct FROM exec_id_manage ")
-    execCt = cursor.fetchone()['exec_ct']
-    cursor.execute(
-        " DELETE FROM exec_id_manage A " \
-        " WHERE A.exec_count < " + str(execCt)
-    )
     
     print('削除後のテーブル解析を行っています...')
     cursor.execute(
