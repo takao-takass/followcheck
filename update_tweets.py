@@ -71,6 +71,19 @@ while requests_max > 0:
         })
         statuses = json.loads(res.text)
 
+        # HTTP200以外のレスポンスが来たらスキップする
+        if res.status_code != 200:
+            cursor.execute(
+                " UPDATE tweet_take_users" \
+                " SET status = '9'" \
+                " ,continue_tweet_id = null" \
+                " ,update_datetime = NOW()" \
+                " WHERE service_user_id = '"+serviceUserId+"'" \
+                " AND user_id = '"+userId+"'"
+            )
+            con.commit()
+            continue
+
         # 取得したツイートをDBに登録する
         print("取得したツイートの情報をDBに登録します。")
         tweets = []
