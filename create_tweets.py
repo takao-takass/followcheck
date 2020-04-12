@@ -59,6 +59,18 @@ while requests_max > 0:
             'max_id':continueTweetId,
             'include_rts':False
         })
+        if res.status_code != 200:
+            cursor.execute(
+                " UPDATE tweet_take_users" \
+                " SET status = '9'" \
+                " ,continue_tweet_id = null" \
+                " ,update_datetime = NOW()" \
+                " WHERE service_user_id = '"+serviceUserId+"'" \
+                " AND user_id = '"+userId+"'"
+            )
+            con.commit()
+            continue
+
         statuses = json.loads(res.text)
 
         # 取得したツイートをDBに登録する
