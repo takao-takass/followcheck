@@ -1,0 +1,4 @@
+# bin フォルダは要らない
+fcmedia/
+__pycache__/
+.vscode/
