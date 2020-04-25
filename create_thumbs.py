@@ -1,11 +1,9 @@
-### メディアのサムネイルを作成する
-### 2020-04-04  たかお
+### 画像メディアのサムネイルを作成する
+### 2020-04-25  たかお
 
 import sys,json, MySQLdb,config
-import os
-import urllib.request
-from model.user import User
-from requests_oauthlib import OAuth1Session
+import os,hashlib
+from PIL import Image
 
 con = MySQLdb.connect(
     host = config.DB_HOST,
@@ -19,80 +17,81 @@ con.autocommit(False)
 cursor = con.cursor(MySQLdb.cursors.DictCursor)
 
 try:
-    print("サムネイルを作成するメディアを確認しています...")
+    print("サムネイルを作成する画像メディアを確認しています...")
     cursor.execute(
-        " SELECT A.tweet_id,A.url,C.disp_name,A.sizes,A.`type` " \
-        " FROM tweet_medias A " \
-        " INNER JOIN tweets B " \
-        " ON A.tweet_id = B.tweet_id " \
-        " INNER JOIN relational_users C " \
-        " ON B.user_id = C.user_id " \
-        " WHERE A.file_name IS NULL " \
-        " AND A.download_error = '0' " \
-        " AND A.deleted = '0' " \
+        " SELECT TM.tweet_id,TM.url,TM.file_name,TM.directory_path"\
+        " FROM tweet_medias TM"\
+        " WHERE TM.thumb_file_name IS NULL"\
+        " AND TM.file_name IS NOT NULL"\
+        " AND TM.`type` IN ('photo','animated_gif')"\
+        " LIMIT 100"
     )
 
-    downloads = []
+    # サムネイルを作成するメディア
+    print("サムネイル作成情報を作成しています...")
+    targetMedias = []
     for row in cursor:
-        downloads.append({
+        targetMedias.append({
             'tweet_id':row['tweet_id'],
             'url':row['url'],
-            'disp_name':row['disp_name'],
-            'sizes':row['sizes'],
-            'type':row['type']
+            'file_name':row['file_name'],
+            'directory_path':row['directory_path']
         })
-    
-    print("ダウンロードするメディア："+str(len(downloads)))
 
-    # メディアをダウンロード
-    count = 0
-    for download in downloads:
+    # サムネイルの作成
+    print("サムネイルの作成を開始します[全"+str(len(targetMedias))+"件]...")
+    for media in targetMedias:
 
-        count += 1
+        # オリジナル画像の読み込み
+        print("サムネイルを作成しています["+media['directory_path']+media['file_name']+"]...")
+        print(" -> オリジナル画像を読み込みます...")
+        original = Image.open(media['directory_path'] + media['file_name']).convert('RGB')
 
-        # URLからドメイン･階層とパラメータを除去してファイル名を作る
-        splitedUrl = download['url'].split('/')
-        filename = splitedUrl[len(splitedUrl)-1].split('?')[0]
+        # 長辺は縦・横のどちらか？
+        #  -> 縦の場合は、横360pxになるように縮小する
+        #  -> 横の場合は、縦260pxになるように縮小する
+        #  -> 同じ場合は、縦260pxになるように縮小する
+        print(" -> 画像を縮小しています...")
+        width,height = original.size
+        scale = 0.0
+        if width > height :
+            # 横が長辺
+            scale = 260.0 / height
+        else :
+            # 縦が長辺
+            scale = 360.0 / width
 
-        # ディレクトリパス（無ければ作る）
-        directory = config.STRAGE_MEDIAS_PATH + download['disp_name'] + '/'
-        if not os.path.exists(directory):
-            os.mkdir(directory)
+        # 画像の縮小
+        original.thumbnail((int(width * scale), int(height * scale)), Image.ANTIALIAS)
 
-        # 画像ファイルの対応サイズを判定
-        size = "thumb"
-        if "large" in download['sizes']:
-            size = "large"
-        elif "medium" in download['sizes']:
-            size = "medium"
-        elif "small" in download['sizes']:
-            size = "small"
-        
-        # ダウンロード
-        # 成功したらDBにファイル名とパスを登録
-        # 例外が発生したらエラーフラグを設定して続行
-        print("ダウンロード中["+str(count)+"/"+str(len(downloads))+"]...  "+download['url'])
-        try:
-            urllib.request.urlretrieve(download['url']+":"+size, directory+filename)
-            cursor.execute(
-                " UPDATE tweet_medias" \
-                " SET file_name = '"+filename+"' " \
-                " ,directory_path = '"+directory+"' " \
-                " ,update_datetime = NOW()" \
-                " WHERE tweet_id = '"+download['tweet_id']+"'" \
-                " AND url = '"+download['url']+"'"
-            ) 
+        # サムネイルのトリミングを行う
+        #  -> サイズは360×260
+        print(" -> 画像をトリミングしています...")
+        thumb = original.crop((0,0,360,260))
 
-        except Exception as e:
-            cursor.execute(
-                " UPDATE tweet_medias" \
-                " SET download_error = 1 " \
-                " ,update_datetime = NOW()" \
-                " WHERE tweet_id = '"+download['tweet_id']+"'" \
-                " AND url = '"+download['url']+"'"
-            ) 
-        
+        # サムネイルファイル名を発行する
+        print(" -> サムネイル名を発行しています...")
+        originText = media['url']
+        thumbName = hashlib.md5(originText.encode()).hexdigest() + ".jpg"
+
+        # サムネイルを保存する
+        print(" -> サムネイルを保存しています...")
+        stragePath = config.STRAGE_MEDIAS_PATH + "thumbs/"
+        thumb.save(stragePath + thumbName, quality=80)
+        print(" -> サムネイルを保存しました。["+stragePath + thumbName+"]")
+
+        # データベースにサムネイル情報を登録する
+        print(" -> データベースにサムネイル情報を登録しています...")
+        cursor.execute(
+            " UPDATE tweet_medias" \
+            " SET thumb_file_name = '"+thumbName+"' " \
+            " ,thumb_directory_path = '"+stragePath+"' " \
+            " ,update_datetime = NOW()" \
+            " WHERE tweet_id = '"+media['tweet_id']+"'" \
+            " AND url = '"+media['url']+"'"
+        ) 
         con.commit()
+        print(" -> 登録しました。")
 
 except Exception as e:
     con.rollback()
@@ -104,5 +103,4 @@ finally:
     cursor.close()
     con.close()
 
-
-print("処理は終了しました。")
+print("プロセスは終了しました。")
