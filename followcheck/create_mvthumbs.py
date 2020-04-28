@@ -1,7 +1,8 @@
-### 画像メディアのサムネイルを作成する
-### 2020-04-25  たかお
+### 映像メディアのサムネイルを作成する
+### 2020-04-29  たかお
 
 import sys,json, MySQLdb,config
+import cv2
 import os,hashlib
 from PIL import Image
 
@@ -17,13 +18,13 @@ con.autocommit(False)
 cursor = con.cursor(MySQLdb.cursors.DictCursor)
 
 try:
-    print("サムネイルを作成する画像メディアを確認しています...")
+    print("サムネイルを作成する映像メディアを確認しています...")
     cursor.execute(
         " SELECT TM.tweet_id,TM.url,TM.file_name,TM.directory_path"\
         " FROM tweet_medias TM"\
         " WHERE TM.thumb_file_name IS NULL"\
         " AND TM.file_name IS NOT NULL"\
-        " AND TM.`type` IN ('photo','animated_gif')"\
+        " AND TM.`type` IN ('video')"\
         " LIMIT 1000"
     )
 
@@ -42,10 +43,28 @@ try:
     print("サムネイルの作成を開始します[全"+str(len(targetMedias))+"件]...")
     for media in targetMedias:
 
-        # オリジナル画像の読み込み
+        # 動画の読み込み
         print("サムネイルを作成しています["+media['directory_path']+media['file_name']+"]...")
-        print(" -> オリジナル画像を読み込みます...")
-        original = Image.open(media['directory_path'] + media['file_name']).convert('RGB')
+        print(" -> 動画を読み込みます...")
+        video = cv2.VideoCapture(media['directory_path'] + media['file_name'])
+        if not video.isOpened():
+            continue
+
+        # サムネイルファイル名を発行する
+        print(" -> サムネイル名を発行しています...")
+        originText = media['url']
+        thumbName = hashlib.md5(originText.encode()).hexdigest() + ".jpg"
+        stragePath = config.STRAGE_MEDIAS_PATH + "thumbs/"
+
+        # 動画の30フレーム目を画像として保存する
+        print(" -> 動画のフレームを切り出して保存しています...")
+        video.set(cv2.CAP_PROP_POS_FRAMES, 30)
+        ret, frame = video.read()
+        cv2.imwrite(stragePath + thumbName, frame)
+
+        # 保存した画像を読み込む
+        print(" -> 保存した画像を読み込みます...")
+        original = Image.open(stragePath + thumbName).convert('RGB')
 
         # 長辺は縦・横のどちらか？
         #  -> 縦の場合は、横360pxになるように縮小する
@@ -69,14 +88,8 @@ try:
         print(" -> 画像をトリミングしています...")
         thumb = original.crop((0,0,360,260))
 
-        # サムネイルファイル名を発行する
-        print(" -> サムネイル名を発行しています...")
-        originText = media['url']
-        thumbName = hashlib.md5(originText.encode()).hexdigest() + ".jpg"
-
         # サムネイルを保存する
         print(" -> サムネイルを保存しています...")
-        stragePath = config.STRAGE_MEDIAS_PATH + "thumbs/"
         thumb.save(stragePath + thumbName, quality=80)
         print(" -> サムネイルを保存しました。["+stragePath + thumbName+"]")
 
