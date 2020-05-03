@@ -14,7 +14,6 @@ twitter = OAuth1Session(CK, CS, AT, ATS) #認証処理
 # リクエスト送信回数の上限
 # API上限 1500/15min、3min周期で実行する想定。
 requests_max = 200
-serviceUserId = '0000000001'
 
 while requests_max > 0:
 
@@ -33,12 +32,11 @@ while requests_max > 0:
         # 対象のユーザを取得する
         print("ツイート取得対象のユーザを確認しています...")
         cursor.execute(
-            " SELECT A.user_id, B.disp_name " \
+            " SELECT A.service_user_id, A.user_id, B.disp_name " \
             " FROM tweet_take_users A " \
             " INNER JOIN relational_users B " \
             " ON A.user_id = B.user_id " \
-            " WHERE A.service_user_id = '"+serviceUserId+"'" \
-            " AND A.status IN ('5','6') "\
+            " WHERE A.status IN ('5','6') "\
             " ORDER BY A.status desc LIMIT 1 "
         )
 
@@ -47,6 +45,7 @@ while requests_max > 0:
             break
 
         for row in cursor:
+            serviceUserId = row['service_user_id']
             userId = row['user_id']
             dispName = row['disp_name']
         

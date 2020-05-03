@@ -7,8 +7,6 @@ import urllib.request
 from model.user import User
 from requests_oauthlib import OAuth1Session
 
-serviceUserId = '0000000001'
-
 con = MySQLdb.connect(
     host = config.DB_HOST,
     port = config.DB_PORT,
@@ -23,26 +21,37 @@ cursor = con.cursor(MySQLdb.cursors.DictCursor)
 try:
     print("削除するユーザを確認しています...")
     cursor.execute(
-        " SELECT A.user_id, B.disp_name " \
+        " SELECT A.service_user_id, A.user_id, B.disp_name, COALESCE(UCT.ct, 0, 1) AS  othor_exists" \
         " FROM tweet_take_users A " \
         " INNER JOIN relational_users B " \
         " ON A.user_id = B.user_id " \
-        " WHERE A.service_user_id = '"+serviceUserId+"'" \
-        " AND A.status IN ('D') "\
+        " LEFT JOIN ( " \
+        "       SELECT STK.user_id, COUNT(*) AS ct" \
+        "       FROM tweet_take_users STK" \
+        "       WHERE STK.status <> 'D'" \
+        "       GROUP BY STK.user_id" \
+        " ) UCT" \
+        " ON A.user_id = UCT.user_id" \
+        " WHERE A.status IN ('D') "
     )
 
     delUsers = []
     for row in cursor:
         delUsers.append({
+            'otherExists' : row['othor_exists'],
+            'serviceUserId' : row['service_user_id'],
             'userId' : row['user_id'],
             'dispName' : row['disp_name']
         })
 
+    # ユーザのメディアファイルを削除する
+    # ただし、他のアカウントで同一ユーザのレコードが生きている場合は、ファイルは削除しない。
     print('ユーザのメディアファイルを削除しています...')
     for delUser in delUsers:
-        directory = config.STRAGE_MEDIAS_PATH + delUser['dispName'] + '/'
-        if os.path.exists(directory):
-            shutil.rmtree(directory)
+        if delUser['otherExists']=='1':
+            directory = config.STRAGE_MEDIAS_PATH + delUser['dispName'] + '/'
+            if os.path.exists(directory):
+                shutil.rmtree(directory)
 
     print('ユーザのメディア情報を削除しています...')
     cursor.execute(
