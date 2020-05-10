@@ -225,8 +225,7 @@ try:
     cursor.execute(
         " SELECT A.user_id " \
         " FROM tweet_take_users A " \
-        " WHERE A.service_user_id = '"+serviceUserId+"'" \
-        " AND A.status NOT IN ('9','D') "\
+        " WHERE A.status NOT IN ('9','D') "\
         " ORDER BY A.status desc LIMIT 1 "
     )
     if cursor.rowcount == 0:
@@ -235,8 +234,7 @@ try:
             " UPDATE tweet_take_users " \
             " SET status = '5' " \
             "    ,update_datetime = NOW() " \
-            " WHERE service_user_id = '"+serviceUserId+"'" \
-            " AND status = '9' "\
+            " WHERE status = '9' "\
         )
         con.commit()
 
