@@ -32,7 +32,7 @@ while requests_max > 0:
         # 対象のユーザを取得する
         print("ツイート取得対象のユーザを確認しています...")
         cursor.execute(
-            " SELECT A.service_user_id, A.user_id, B.disp_name, A.continue_tweet_id " \
+            " SELECT A.service_user_id, A.user_id, B.disp_name, A.continue_tweet_id, A.include_retweet " \
             " FROM tweet_take_users A " \
             " INNER JOIN relational_users B " \
             " ON A.user_id = B.user_id " \
@@ -48,7 +48,8 @@ while requests_max > 0:
             serviceUserId = row['service_user_id']
             userId = row['user_id']
             dispName = row['disp_name']
-            continueTweetId= row['continue_tweet_id']
+            continueTweetId = row['continue_tweet_id']
+            include_retweet = row['include_retweet']
 
         # APIにリクエストを送信してツイートを取得する
         print(userId+"のツイートを上限200件で取得しています...")
@@ -56,7 +57,7 @@ while requests_max > 0:
             'screen_name':dispName,
             'count':200,
             'max_id':continueTweetId,
-            'include_rts':False
+            'include_rts':(False if include_retweet==0 else True)
         })
         if res.status_code != 200:
             cursor.execute(
@@ -76,18 +77,26 @@ while requests_max > 0:
         print("取得したツイートの情報をDBに登録します。")
         tweets = []
         tweetMedias = []
+        other_user_id = []
         for statuse in statuses:
             # ツイートの本文
             tweets.append({
                 'service_user_id':serviceUserId,
                 'user_id':userId,
                 'tweet_id':statuse['id_str'],
+                'tweet_user_id':userId if (not 'retweeted_status' in statuse) else statuse['retweeted_status']['id_str'],
                 'body':statuse['text'],
                 'tweeted_datetime':statuse['created_at'],
                 'favolite_count':statuse['favorite_count'],
                 'retweet_count':statuse['retweet_count'],
-                'replied': "0" if statuse['in_reply_to_screen_name'] is None else "1"
+                'replied': "0" if statuse['in_reply_to_screen_name'] is None else "1",
+                'retweeted':"0" if (not 'retweeted_status' in statuse) else "1",
             })
+
+            # リツイート元ツイートの投稿主（ユーザID）
+            # relational_usersに登録しておく必要がある
+            if 'retweeted_status' in statuse:
+                other_user_id.append(statuse['retweeted_status']['id_str'])
 
             # ツイートに付随するメディア
             if 'extended_entities' in statuse:
@@ -135,11 +144,13 @@ while requests_max > 0:
                 " 	service_user_id" \
                 " 	,user_id" \
                 " 	,tweet_id" \
+                " 	,tweet_user_id" \
                 " 	,body" \
                 " 	,tweeted_datetime" \
                 " 	,favolite_count" \
                 " 	,retweet_count" \
                 " 	,replied" \
+                " 	,retweeted" \
                 " 	,create_datetime" \
                 " 	,update_datetime" \
                 " 	,deleted" \
@@ -147,11 +158,13 @@ while requests_max > 0:
                 " 	 '"+serviceUserId+"'" \
                 " 	,'"+tweet['user_id']+"'" \
                 " 	,'"+tweet['tweet_id']+"'" \
+                " 	,'"+tweet['tweet_user_id']+"'" \
                 " 	,'"+tweet['body'].replace("'","").replace("/","").replace("%","").replace("\\","")+"'" \
                 " 	,STR_TO_DATE('"+tweet['tweeted_datetime']+"','%a %b %d %H:%i:%s +0000 %Y')" \
                 " 	,"+str(tweet['favolite_count'])+"" \
                 " 	,"+str(tweet['retweet_count'])+"" \
                 " 	,"+tweet['replied']+"" \
+                " 	,"+tweet['retweeted']+"" \
                 " 	,NOW()" \
                 " 	,NOW()" \
                 " 	,0" \
@@ -185,6 +198,17 @@ while requests_max > 0:
                 " 	,NOW()" \
                 " 	,NOW()" \
                 " )"
+                " ON DUPLICATE KEY UPDATE " \
+                " 	update_datetime = NOW() /*既に登録済みの場合は更新日時のみ更新*/ "
+            )
+
+        # リツイート元の投稿主をDBに登録
+        print(str(len(other_user_id))+"件のリツイート元の投稿主を登録しています...")
+        for user_id in other_user_id:
+            cursor.execute(
+                "INSERT INTO relational_users"\
+                "(user_id, disp_name, name)"\
+                "VALUES ('" +  user_id  + "', '　', '　')"
                 " ON DUPLICATE KEY UPDATE " \
                 " 	update_datetime = NOW() /*既に登録済みの場合は更新日時のみ更新*/ "
             )
