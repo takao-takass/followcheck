@@ -5,3 +5,4 @@ LOG_YMD=`date '+%Y%m%d'`
 
 cd /opt/followcheck/scripts
 /usr/local/bin/python3.7 ./update_reluser.py >> ../log/update_reluser_$LOG_YMD.log
+/usr/local/bin/python3.7 ./update_profileicon.py >> ../log/update_reluser_$LOG_YMD.log
