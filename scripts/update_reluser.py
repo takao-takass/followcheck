@@ -35,6 +35,7 @@ try:
         " SELECT RU.user_id "\
         " FROM relational_users RU "\
         " WHERE RU.deleted = 0"\
+        " AND RU.disabled = 0" \
         " ORDER BY RU.update_datetime asc" \
         " LIMIT 9999"
     )
@@ -49,7 +50,6 @@ except Exception as e:
 finally:
     cursor.close()
     con.close()
-
 
 print('関連ユーザの情報を取得しています... ['+str(len(relationalUserIdList))+'件]')
 
@@ -113,20 +113,38 @@ con.autocommit(False)
 cursor = con.cursor()
 
 try:
-    print('関連ユーザを更新しています...')
     for user in relationalUesrList:
-        sql = " UPDATE relational_users RU "\
-            " SET RU.disp_name = '"+user.screen_name+"'"\
-            " ,RU.name = '"+user.name.replace("'","").replace("/","").replace("%","").replace("\\","")+"'"\
-            " ,RU.thumbnail_url = '"+user.thumbnail_url.replace('_normal','')+"'"\
-            " ,RU.description = '"+user.description.replace("'","").replace("/","").replace("%","").replace("\\","")+"'"\
-            " ,RU.theme_color = '"+user.theme_color+"'"\
-            " ,RU.follow_count = "+str(user.friends_count)+""\
-            " ,RU.follower_count = "+str(user.followers_count)+""\
-            " ,RU.update_datetime = NOW()"\
-            " WHERE RU.user_id = '"+user.id_str+"'"
+
         try:
+            # 関連ユーザテーブルを更新する
+            print('関連ユーザテーブルを更新しています...['+user.screen_name+'、id='+user.id_str+']')
+            sql = " UPDATE relational_users RU "\
+                " SET RU.disp_name = '"+user.screen_name+"'"\
+                " ,RU.name = '"+user.name.replace("'","").replace("/","").replace("%","").replace("\\","")+"'"\
+                " ,RU.description = '"+user.description.replace("'","").replace("/","").replace("%","").replace("\\","")+"'"\
+                " ,RU.theme_color = '"+user.theme_color+"'"\
+                " ,RU.follow_count = "+str(user.friends_count)+""\
+                " ,RU.follower_count = "+str(user.followers_count)+""\
+                " ,RU.update_datetime = NOW()"\
+                " WHERE RU.user_id = '"+user.id_str+"'"
             cursor.execute(sql)
+
+            # プロフィールアイコンテーブルを更新する
+            # 同じuser_idで新しいURLを取得した場合はレコードをINSERTする。
+            profile_icon_url = user.thumbnail_url.replace('_normal','')
+            sql = "SELECT COUNT(*) FROM profile_icons WHERE user_id = '"+user.id_str+"' AND url = '"+profile_icon_url+"'"
+            cursor.execute(sql)
+            for row in cursor:
+                record_ct = row[0]
+            if record_ct == 0:
+                print('プロフォールアイコンテーブルを更新しています...')
+                sql = " INSERT INTO profile_icons (user_id, sequence, url) "\
+                    " SELECT '"+user.id_str+"' "\
+                    "       ,(SELECT COUNT(*) FROM profile_icons WHERE user_id = '"+user.id_str+"') "\
+                    "       ,'"+profile_icon_url+"' "\
+                    "   FROM DUAL "
+                cursor.execute(sql)
+
         except Exception as ex:
             print("ERROR: ",ex)
             print(sql)
