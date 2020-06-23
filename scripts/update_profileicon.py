@@ -74,7 +74,7 @@ try:
             print("ERROR: ",e)
             cursor.execute(
                 " UPDATE profile_icons RI " \
-                " SET completed = 1 " \
+                " SET completed = 9 " \
                 " WHERE user_id = '"+download['user_id']+"'" \
                 " AND sequence = "+str(download['sequence'])
             ) 
