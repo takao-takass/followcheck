@@ -45,7 +45,7 @@ try:
         " FROM relational_users RU "\
         " WHERE RU.icecream IN (0,1) "\
         " ORDER BY RU.verify_datetime IS NULL DESC "\
-        " LIMIT 5"
+        " LIMIT 300"
     cursor.execute(sql)
     verify_users = []
     for row in cursor:
