@@ -35,7 +35,7 @@ try:
         " SELECT RU.user_id "\
         " FROM relational_users RU "\
         " WHERE RU.deleted = 0"\
-        " AND RU.disabled = 0" \
+        " AND RU.icecream = 0" \
         " ORDER BY RU.update_datetime asc" \
         " LIMIT 9999"
     )
