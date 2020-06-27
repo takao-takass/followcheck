@@ -37,6 +37,7 @@ while requests_max > 0:
             " INNER JOIN relational_users B " \
             " ON A.user_id = B.user_id " \
             " WHERE A.status IN ('0','1') "\
+            " AND B.icecream = 0" \
             " ORDER BY A.status desc LIMIT 1 "
         )
 
