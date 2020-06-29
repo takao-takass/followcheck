@@ -277,9 +277,12 @@ cursor = con.cursor(MySQLdb.cursors.DictCursor)
 try:
 
     cursor.execute(
-        " SELECT A.user_id " \
-        " FROM tweet_take_users A " \
-        " WHERE A.status NOT IN ('9','D') "\
+        " SELECT A.user_id "\
+        " FROM tweet_take_users A "\
+        " INNER JOIN relational_users B "\
+        " ON A.user_id = B.user_id "\
+        " WHERE A.status NOT IN ('0','1','9','D') "\
+        " AND B.icecream = 0 "\
         " ORDER BY A.status desc LIMIT 1 "
     )
     if cursor.rowcount == 0:
