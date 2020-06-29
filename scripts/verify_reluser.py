@@ -71,6 +71,12 @@ try:
                 'before_icecream':verify_user['icecream'],
                 'after_icecream':0
             })
+        elif response.status_code == 429:
+            print('APIが規制されています。スキップします。')
+            print("Failed: " + str(response.status_code) +" - "+response.text)
+        elif response.status_code == 403:
+            print('アカウントには鍵がかけられています。スキップします。')
+            print("Failed: " + str(response.status_code) +" - "+response.text)
         else:
             print('無効なアカウントです。')
             print("Failed: " + str(response.status_code) +" - "+response.text)
