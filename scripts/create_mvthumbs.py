@@ -60,7 +60,12 @@ try:
         print(" -> 動画のフレームを切り出して保存しています...")
         video.set(cv2.CAP_PROP_POS_FRAMES, 30)
         ret, frame = video.read()
-        cv2.imwrite(stragePath + thumbName, frame)
+        try:
+            cv2.imwrite(stragePath + thumbName, frame)
+        except Exception as e:
+            print(" -> ERROR:フレームの切り出しに失敗しました。動画のフォーマットを確認してください。")
+            print(" -> ",e)
+            continue
 
         # 保存した画像を読み込む
         print(" -> 保存した画像を読み込みます...")
