@@ -96,7 +96,7 @@ while requests_max > 0:
                 'service_user_id':serviceUserId,
                 'user_id':userId,
                 'tweet_id':statuse['id_str'],
-                'tweet_user_id':userId if (not 'retweeted_status' in statuse) else statuse['retweeted_status']['id_str'],
+                'tweet_user_id':userId if (not 'retweeted_status' in statuse) else statuse["retweeted_status"]["user"]["id_str"],
                 'body':statuse['text'],
                 'tweeted_datetime':statuse['created_at'],
                 'favolite_count':statuse['favorite_count'],
@@ -108,7 +108,7 @@ while requests_max > 0:
             # リツイート元ツイートの投稿主（ユーザID）
             # relational_usersに登録しておく必要がある
             if 'retweeted_status' in statuse:
-                other_user_id.append(statuse['retweeted_status']['id_str'])
+                other_user_id.append(statuse["retweeted_status"]["user"]["id_str"])
 
             # ツイートに付随するメディア
             if 'extended_entities' in statuse:
