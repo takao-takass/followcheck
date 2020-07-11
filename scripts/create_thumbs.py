@@ -19,8 +19,12 @@ cursor = con.cursor(MySQLdb.cursors.DictCursor)
 try:
     print("サムネイルを作成する画像メディアを確認しています...")
     cursor.execute(
-        " SELECT TM.tweet_id,TM.url,TM.file_name,TM.directory_path"\
+        " SELECT TM.tweet_id,TM.url,TM.file_name,TM.directory_path,RU.disp_name"\
         " FROM tweet_medias TM"\
+        " INNER JOIN tweets TW" \
+        " ON TM.tweet_id = TW.tweet_id" \
+        " INNER JOIN relational_users RU" \
+        " ON TW.user_id = RU.user_id" \
         " WHERE TM.thumb_file_name IS NULL"\
         " AND TM.file_name IS NOT NULL"\
         " AND TM.`type` IN ('photo','animated_gif')"\
@@ -35,7 +39,8 @@ try:
             'tweet_id':row['tweet_id'],
             'url':row['url'],
             'file_name':row['file_name'],
-            'directory_path':row['directory_path']
+            'directory_path':row['directory_path'],
+            'disp_name':row['disp_name']
         })
 
     # サムネイルの作成
@@ -76,7 +81,7 @@ try:
 
         # サムネイルを保存する
         print(" -> サムネイルを保存しています...")
-        stragePath = config.STRAGE_MEDIAS_PATH + "thumbs/"
+        stragePath = config.STRAGE_MEDIAS_PATH + media['disp_name'] + '/'
         thumb.save(stragePath + thumbName, quality=80)
         print(" -> サムネイルを保存しました。["+stragePath + thumbName+"]")
 

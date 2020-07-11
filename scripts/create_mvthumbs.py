@@ -20,12 +20,16 @@ cursor = con.cursor(MySQLdb.cursors.DictCursor)
 try:
     print("サムネイルを作成する映像メディアを確認しています...")
     cursor.execute(
-        " SELECT TM.tweet_id,TM.url,TM.file_name,TM.directory_path"\
-        " FROM tweet_medias TM"\
-        " WHERE TM.thumb_file_name IS NULL"\
-        " AND TM.file_name IS NOT NULL"\
-        " AND TM.`type` IN ('video')"\
-        " LIMIT 1000"
+        " SELECT TM.tweet_id,TM.url,TM.file_name,TM.directory_path,RU.disp_name" \
+        " FROM tweet_medias TM" \
+        " INNER JOIN tweets TW" \
+        " ON TM.tweet_id = TW.tweet_id" \
+        " INNER JOIN relational_users RU" \
+        " ON TW.user_id = RU.user_id" \
+        " WHERE TM.thumb_file_name IS NULL" \
+        " AND TM.file_name IS NOT NULL" \
+        " AND TM.`type` IN ('video')" \
+        " LIMIT 1000" \
     )
 
     # サムネイルを作成するメディア
@@ -36,7 +40,8 @@ try:
             'tweet_id':row['tweet_id'],
             'url':row['url'],
             'file_name':row['file_name'],
-            'directory_path':row['directory_path']
+            'directory_path':row['directory_path'],
+            'disp_name':row['disp_name']
         })
 
     # サムネイルの作成
@@ -54,7 +59,7 @@ try:
         print(" -> サムネイル名を発行しています...")
         originText = media['url']
         thumbName = hashlib.md5(originText.encode()).hexdigest() + ".jpg"
-        stragePath = config.STRAGE_MEDIAS_PATH + "thumbs/"
+        stragePath = config.STRAGE_MEDIAS_PATH + media['disp_name'] + '/'
 
         # 動画の30フレーム目を画像として保存する
         print(" -> 動画のフレームを切り出して保存しています...")
