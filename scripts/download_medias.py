@@ -82,6 +82,12 @@ try:
                 " WHERE tweet_id = '"+download['tweet_id']+"'" \
                 " AND url = '"+download['url']+"'"
             ) 
+            cursor.execute(
+                " INSERT INTO queue_create_thumbs"\
+                " 	(tweet_id, url)"\
+                " 	VALUES"\
+                " 	('"+download['tweet_id']+"', '"+download['url']+"')"
+            ) 
 
         except Exception as e:
             cursor.execute(
