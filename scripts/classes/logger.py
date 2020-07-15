@@ -1,5 +1,5 @@
 
-import logging
+import logging, sys
 
 class ThreadLogging:
 
