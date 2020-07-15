@@ -3,7 +3,7 @@ import logging
 
 class ThreadLogging:
 
-    logging.basicConfig(level=logging.DEBUG, format='%(asctime)s [%(levelname)s] %(filename)s:%(lineno)s %(message)s')
+    logging.basicConfig(stream=sys.stdout, level=logging.DEBUG, format='%(asctime)s [%(levelname)s] %(filename)s:%(lineno)s %(message)s')
     thread_id = ''
 
     def __init__( self, thread_id) :

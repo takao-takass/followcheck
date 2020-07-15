@@ -71,9 +71,10 @@ try:
         # ダウンロード
         # 成功したらDBにファイル名とパスを登録
         # 例外が発生したらエラーフラグを設定して続行
-        print("ダウンロード中["+str(count)+"/"+str(len(downloads))+"]...  "+download['url'])
         try:
+            print("ダウンロード中["+str(count)+"/"+str(len(downloads))+"]...  "+download['url'])
             urllib.request.urlretrieve(download['url']+":"+size, directory+filename)
+            print("-> tweet_mediasに登録しています...")
             cursor.execute(
                 " UPDATE tweet_medias" \
                 " SET file_name = '"+filename+"' " \
@@ -82,6 +83,7 @@ try:
                 " WHERE tweet_id = '"+download['tweet_id']+"'" \
                 " AND url = '"+download['url']+"'"
             ) 
+            print("-> queue_create_thumbsに登録しています...")
             cursor.execute(
                 " INSERT INTO queue_create_thumbs"\
                 " 	(tweet_id, url)"\
@@ -98,7 +100,8 @@ try:
                 " AND url = '"+download['url']+"'"
             ) 
         
-        con.commit()
+        finally:
+            con.commit()
 
 except Exception as e:
     con.rollback()
