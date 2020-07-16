@@ -92,6 +92,8 @@ try:
             ) 
 
         except Exception as e:
+            print("-> エラーが発生しました。ステータスを更新します。")
+            print("ERROR: ",e)
             cursor.execute(
                 " UPDATE tweet_medias" \
                 " SET download_error = 1 " \
