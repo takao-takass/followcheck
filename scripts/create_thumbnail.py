@@ -28,7 +28,7 @@ class CreateThumbnail:
                 " UPDATE queue_create_thumbs A"\
                 " SET A.thread_id = %(thread_id)s"\
                 " WHERE A.`status` = 0"\
-                " AND A.thread_id = '' "\
+                " AND A.thread_id IS NULL "\
                 " LIMIT 100",
                 {
                     'thread_id':thread_id
