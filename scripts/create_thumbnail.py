@@ -46,7 +46,7 @@ class CreateThumbnail:
                 " INNER JOIN tweets C"\
                 " ON B.tweet_id = C.tweet_id"\
                 " INNER JOIN relational_users D"\
-                " ON C.tweet_user_id = D.user_id"\
+                " ON C.user_id = D.user_id"\
                 " WHERE A.thread_id = %(thread_id)s"\
                 " AND A.`status` = 0",
                 {
