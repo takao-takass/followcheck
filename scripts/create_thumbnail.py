@@ -29,7 +29,7 @@ class CreateThumbnail:
                 " SET A.thread_id = %(thread_id)s"\
                 " WHERE A.`status` = 0"\
                 " AND A.thread_id IS NULL "\
-                " LIMIT 100",
+                " LIMIT 1000",
                 {
                     'thread_id':thread_id
                 }
@@ -58,6 +58,12 @@ class CreateThumbnail:
             for result in results:
 
                 try:
+
+                    # サムネイルファイル名を発行する
+                    log.info(" -> サムネイル名を発行しています...")
+                    originText = result['url']
+                    stragePath = config.STRAGE_MEDIAS_PATH + result['disp_name'] + '/'
+                    thumbName = hashlib.md5(originText.encode()).hexdigest() + ".jpg"
 
                     # 画像メディアの読み込み
                     if result['type'] in ('photo','animated_gif'):
@@ -106,14 +112,8 @@ class CreateThumbnail:
                     log.info(" -> 画像をトリミングしています...")
                     thumb = original.crop((0,0,360,260))
 
-                    # サムネイルファイル名を発行する
-                    log.info(" -> サムネイル名を発行しています...")
-                    originText = result['url']
-                    thumbName = hashlib.md5(originText.encode()).hexdigest() + ".jpg"
-
                     # サムネイルを保存する
                     log.info(" -> サムネイルを保存しています...")
-                    stragePath = config.STRAGE_MEDIAS_PATH + result['disp_name'] + '/'
                     thumb.save(stragePath + thumbName, quality=80)
                     log.info(" -> サムネイルを保存しました。["+stragePath + thumbName+"]")
 
