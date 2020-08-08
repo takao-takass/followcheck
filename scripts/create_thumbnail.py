@@ -151,9 +151,11 @@ class CreateThumbnail:
                     db.execute(
                         " UPDATE queue_create_thumbs A"\
                         " SET A.`status` = 9"\
+                        "    ,A.error_text = %(error_text)s" \
                         " WHERE A.tweet_id = %(tweet_id)s"\
                         " AND A.url = %(url)s",
                         {
+                            'error_text' : str(e),
                             'tweet_id' : result['tweet_id'],
                             'url' : result['url']
                         }
