@@ -1,4 +1,4 @@
-
+import datetime
 from classes import logger, thread, databeses, exceptions
 
 class ThreadId():
@@ -25,7 +25,7 @@ class ThreadId():
                 raise exceptions.UncreatedThreadException()
 
             # スレッドIDを発番する
-            thread_id = 'CRTH-'+str(running_thread)
+            thread_id = datetime.datetime.now().strftime('%H%M%S')
             db.execute(
                 " INSERT INTO threads" \
                 " (prosess_name, thread_id) " \
