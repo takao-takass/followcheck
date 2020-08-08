@@ -90,6 +90,13 @@ try:
                 " 	VALUES"\
                 " 	('"+download['tweet_id']+"', '"+download['url']+"')"
             ) 
+            print("-> queue_compress_mediasに登録しています...")
+            cursor.execute(
+                " INSERT INTO queue_compress_medias"\
+                " 	(tweet_id, url)"\
+                " 	VALUES"\
+                " 	('"+download['tweet_id']+"', '"+download['url']+"')"
+            ) 
 
         except Exception as e:
             print("-> エラーが発生しました。ステータスを更新します。")
