@@ -96,7 +96,7 @@ class CompressMedia:
         finally:
             if 'thread_id' in locals():
                 log.info('プロセスを終了します。')
-                thread.ThreadId().ExitThread(thread_id)
+                thread.ThreadId().ExitThread('compress_media.py',thread_id)
 
 # 処理実行
 CompressMedia.run()

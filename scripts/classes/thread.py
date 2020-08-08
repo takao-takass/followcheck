@@ -49,14 +49,16 @@ class ThreadId():
 
 
     # スレッドIDを削除する
-    def ExitThread(self, thread_id):
+    def ExitThread(self,process_name,thread_id):
 
         try:
             db = databeses.DbConnection(self.log)
             db.execute(
                 " DELETE FROM threads" \
-                " WHERE thread_id = %(thread_id)s",
+                " WHERE process_name =  %(process_name)s" \
+                " AND thread_id = %(thread_id)s",
                 {
+                    'process_name':process_name,
                     'thread_id':thread_id
                 }
             )
