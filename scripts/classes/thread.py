@@ -55,7 +55,7 @@ class ThreadId():
             db = databeses.DbConnection(self.log)
             db.execute(
                 " DELETE FROM threads" \
-                " WHERE process_name =  %(process_name)s" \
+                " WHERE prosess_name = %(process_name)s" \
                 " AND thread_id = %(thread_id)s",
                 {
                     'process_name':process_name,
