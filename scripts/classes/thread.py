@@ -25,7 +25,7 @@ class ThreadId():
                 raise exceptions.UncreatedThreadException()
 
             # スレッドIDを発番する
-            thread_id = datetime.datetime.now().strftime('%H%M%S')+running_thread
+            thread_id = datetime.datetime.now().strftime('%H%M%S') + str(running_thread)
             db.execute(
                 " INSERT INTO threads" \
                 " (prosess_name, thread_id) " \
