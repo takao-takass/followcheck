@@ -34,8 +34,8 @@ CREATE TABLE IF NOT EXISTS `code` (
 CREATE TABLE IF NOT EXISTS `exec_id_manage` (
   `exec_id` varchar(14) COLLATE utf8mb4_general_ci NOT NULL COMMENT '実行ID',
   `exec_count` int unsigned NOT NULL COMMENT '実行回数（n回目）',
-  `create_datetime` datetime NOT NULL COMMENT '作成日時',
-  `update_datetime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新日時',
+  `create_datetime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '作成日時',
+  `update_datetime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新日時',
   `deleted` tinyint NOT NULL DEFAULT '0' COMMENT '論理削除'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='実行IDを管理する。\r\n前回実行した時の実行IDを特定するために用いる。';
 
@@ -46,8 +46,8 @@ CREATE TABLE IF NOT EXISTS `followers` (
   `user_id` varchar(70) COLLATE utf8mb4_general_ci NOT NULL COMMENT 'ユーザID',
   `exec_id` varchar(14) COLLATE utf8mb4_general_ci NOT NULL COMMENT '実行ID',
   `follower_user_id` varchar(70) COLLATE utf8mb4_general_ci NOT NULL COMMENT 'フォロワーユーザID',
-  `create_datetime` datetime NOT NULL COMMENT '作成日時',
-  `update_datetime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新日時',
+  `create_datetime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '作成日時',
+  `update_datetime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新日時',
   `deleted` tinyint NOT NULL DEFAULT '0' COMMENT '論理削除',
   PRIMARY KEY (`user_id`,`exec_id`,`follower_user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='フォロワーのユーザを利用者ごとに管理する。';
@@ -59,8 +59,8 @@ CREATE TABLE IF NOT EXISTS `follow_eachother` (
   `user_id` varchar(70) COLLATE utf8mb4_general_ci NOT NULL COMMENT 'ユーザID',
   `follow_user_id` varchar(70) COLLATE utf8mb4_general_ci NOT NULL COMMENT 'フォローユーザID',
   `undisplayed` tinyint NOT NULL DEFAULT '0' COMMENT '非表示',
-  `create_datetime` datetime NOT NULL COMMENT '登録日時',
-  `update_datetime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新日時',
+  `create_datetime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '登録日時',
+  `update_datetime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新日時',
   `deleted` tinyint NOT NULL DEFAULT '0' COMMENT '論理削除',
   PRIMARY KEY (`user_id`,`follow_user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='相互フォローのユーザ\r\n';
@@ -117,6 +117,17 @@ CREATE TABLE IF NOT EXISTS `hashtags` (
 
 -- エクスポートするデータが選択されていません
 
+--  テーブル followcheck.keep_tweets の構造をダンプしています
+CREATE TABLE IF NOT EXISTS `keep_tweets` (
+  `service_user_id` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'サービス利用者ID',
+  `tweet_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'ツイートID',
+  `create_datetime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '登録日時',
+  `update_datetime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新日時',
+  PRIMARY KEY (`service_user_id`,`tweet_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC COMMENT='キープされたツイート';
+
+-- エクスポートするデータが選択されていません
+
 --  テーブル followcheck.profile_icons の構造をダンプしています
 CREATE TABLE IF NOT EXISTS `profile_icons` (
   `user_id` varchar(70) COLLATE utf8mb4_general_ci NOT NULL COMMENT 'TwitterのユーザID',
@@ -133,16 +144,45 @@ CREATE TABLE IF NOT EXISTS `profile_icons` (
 
 -- エクスポートするデータが選択されていません
 
+--  テーブル followcheck.queue_compress_medias の構造をダンプしています
+CREATE TABLE IF NOT EXISTS `queue_compress_medias` (
+  `tweet_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'ツイートID',
+  `url` varchar(400) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'メディアURL',
+  `status` varchar(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '0' COMMENT 'キューのステータス',
+  `thread_id` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '処理を担当しているスレッドID',
+  `error_text` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci COMMENT 'エラーテキスト',
+  `create_datetime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '登録日時',
+  `update_datetime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新日時',
+  PRIMARY KEY (`tweet_id`,`url`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC COMMENT='メディア圧縮処理の待ち行列';
+
+-- エクスポートするデータが選択されていません
+
 --  テーブル followcheck.queue_create_thumbs の構造をダンプしています
 CREATE TABLE IF NOT EXISTS `queue_create_thumbs` (
   `tweet_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'ツイートID',
   `url` varchar(400) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'メディアURL',
   `status` varchar(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '0' COMMENT 'キューのステータス',
   `thread_id` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '処理を担当しているスレッドID',
+  `error_text` text COLLATE utf8mb4_general_ci COMMENT 'エラーテキスト',
   `create_datetime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '登録日時',
-  `update_datetime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新日時',
+  `update_datetime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新日時',
   PRIMARY KEY (`tweet_id`,`url`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC COMMENT='サムネイル作成処理の待ち行列';
+
+-- エクスポートするデータが選択されていません
+
+--  テーブル followcheck.queue_delete_tweets の構造をダンプしています
+CREATE TABLE IF NOT EXISTS `queue_delete_tweets` (
+  `service_user_id` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'サービス利用者ID',
+  `tweet_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'ツイートID',
+  `status` varchar(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '0' COMMENT 'キューのステータス',
+  `thread_id` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '処理を担当しているスレッドID',
+  `error_text` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci COMMENT 'エラーテキスト',
+  `create_datetime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '登録日時',
+  `update_datetime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新日時',
+  PRIMARY KEY (`service_user_id`,`tweet_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC COMMENT='ツイート削除処理のキュー';
 
 -- エクスポートするデータが選択されていません
 
@@ -173,8 +213,8 @@ CREATE TABLE IF NOT EXISTS `remove_users` (
   `remove_user_id` varchar(70) COLLATE utf8mb4_general_ci NOT NULL COMMENT 'リムーブされたユーザID',
   `day_old` int unsigned NOT NULL DEFAULT '0' COMMENT '経過日数',
   `followed` tinyint NOT NULL DEFAULT '0' COMMENT 'フォローしている(1:YES 0:NO)',
-  `create_datetime` datetime NOT NULL COMMENT '登録日時',
-  `update_datetime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新日時',
+  `create_datetime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '登録日時',
+  `update_datetime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新日時',
   `deleted` tinyint NOT NULL DEFAULT '0' COMMENT '論理削除',
   PRIMARY KEY (`user_id`,`remove_user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='リムーブされたユーザのリストを利用者ごとに管理する。\r\n再フォローされたときは論理削除される。';
@@ -198,8 +238,8 @@ CREATE TABLE IF NOT EXISTS `service_users` (
   `name` varchar(50) COLLATE utf8mb4_general_ci NOT NULL COMMENT '利用者名',
   `mailaddress` varchar(100) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '0',
   `password` varchar(255) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
-  `create_datetime` datetime NOT NULL COMMENT '登録日時',
-  `update_datetime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新日時',
+  `create_datetime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '登録日時',
+  `update_datetime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新日時',
   `deleted` tinyint NOT NULL DEFAULT '0' COMMENT '論理削除',
   PRIMARY KEY (`service_user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='このアプリケーションを使用するユーザ（利用者）を管理する。';
@@ -237,13 +277,14 @@ CREATE TABLE IF NOT EXISTS `tweets` (
   `tweet_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'ツイートID',
   `tweet_user_id` varchar(70) COLLATE utf8mb4_general_ci NOT NULL COMMENT 'ツイートしたユーザのID',
   `body` varchar(400) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '本文',
+  `arranged_body` varchar(200) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '整形本文',
   `tweeted_datetime` datetime NOT NULL COMMENT 'ツイート日時',
   `favolite_count` int unsigned NOT NULL DEFAULT '0' COMMENT 'お気に入り数',
   `retweet_count` int unsigned NOT NULL DEFAULT '0' COMMENT 'リツイート数',
   `replied` tinyint NOT NULL DEFAULT '0' COMMENT 'リプライしたツイート',
   `retweeted` tinyint NOT NULL DEFAULT '0' COMMENT 'リツイートされたツイート',
-  `create_datetime` datetime NOT NULL COMMENT '登録日時',
-  `update_datetime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新日時',
+  `create_datetime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '登録日時',
+  `update_datetime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新日時',
   `deleted` tinyint NOT NULL DEFAULT '0' COMMENT '論理削除',
   PRIMARY KEY (`service_user_id`,`user_id`,`tweet_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC COMMENT='取得したツイートを登録する';
@@ -274,11 +315,22 @@ CREATE TABLE IF NOT EXISTS `tweet_medias` (
   `thumb_file_name` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT 'サムネイルファイル名',
   `thumb_directory_path` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT 'サムネイルディレクトリパス',
   `download_error` tinyint NOT NULL DEFAULT '0' COMMENT 'ダウンロードエラー有無',
-  `create_datetime` datetime NOT NULL COMMENT '登録日時',
-  `update_datetime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新日時',
+  `create_datetime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '登録日時',
+  `update_datetime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新日時',
   `deleted` tinyint NOT NULL DEFAULT '0' COMMENT '論理削除',
-  PRIMARY KEY (`tweet_id`,`url`)
+  PRIMARY KEY (`tweet_id`,`url`),
+  KEY `tweet_id` (`tweet_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC COMMENT='取得したツイートを登録する';
+
+-- エクスポートするデータが選択されていません
+
+--  テーブル followcheck.tweet_medias_cp の構造をダンプしています
+CREATE TABLE IF NOT EXISTS `tweet_medias_cp` (
+  `tweet_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'ツイートID',
+  `url` varchar(400) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'メディアURL',
+  `message` text COLLATE utf8mb4_general_ci,
+  PRIMARY KEY (`tweet_id`,`url`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 
 -- エクスポートするデータが選択されていません
 
@@ -290,8 +342,8 @@ CREATE TABLE IF NOT EXISTS `tweet_take_users` (
   `taked_datetime` datetime DEFAULT NULL COMMENT '取得完了日時',
   `continue_tweet_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '取得継続に使うツイートID',
   `include_retweet` tinyint NOT NULL DEFAULT '1' COMMENT 'リツイートもダウンロードする',
-  `create_datetime` datetime NOT NULL COMMENT '登録日時',
-  `update_datetime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新日時',
+  `create_datetime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '登録日時',
+  `update_datetime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新日時',
   `deleted` tinyint NOT NULL DEFAULT '0' COMMENT '論理削除',
   PRIMARY KEY (`service_user_id`,`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='全てのツイートを取得するユーザを管理する';
@@ -316,8 +368,8 @@ CREATE TABLE IF NOT EXISTS `unfollowbacked` (
   `unfollowbacked_user_id` varchar(70) COLLATE utf8mb4_general_ci NOT NULL COMMENT 'フォロバ待ちユーザID',
   `day_old` int unsigned NOT NULL DEFAULT '0' COMMENT '経過日数',
   `undisplayed` tinyint NOT NULL DEFAULT '0' COMMENT '非表示',
-  `create_datetime` datetime NOT NULL COMMENT '登録日時',
-  `update_datetime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新日時',
+  `create_datetime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '登録日時',
+  `update_datetime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新日時',
   `deleted` tinyint NOT NULL DEFAULT '0' COMMENT '論理削除',
   PRIMARY KEY (`user_id`,`unfollowbacked_user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='フォロバ待ちユーザのリストを利用者ごとに管理する。\r\n相互フォローになった場合は削除される。';
@@ -328,8 +380,8 @@ CREATE TABLE IF NOT EXISTS `unfollowbacked` (
 CREATE TABLE IF NOT EXISTS `users_accounts` (
   `service_user_id` varchar(10) COLLATE utf8mb4_general_ci NOT NULL COMMENT 'サービス利用者ID',
   `user_id` varchar(70) COLLATE utf8mb4_general_ci NOT NULL COMMENT 'ユーザID(Twitter)',
-  `create_datetime` datetime NOT NULL COMMENT '登録日時',
-  `update_datetime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新日時',
+  `create_datetime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '登録日時',
+  `update_datetime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新日時',
   `deleted` tinyint NOT NULL DEFAULT '0' COMMENT '論理削除',
   PRIMARY KEY (`service_user_id`,`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='利用者のTwitterアカウントを登録する';
