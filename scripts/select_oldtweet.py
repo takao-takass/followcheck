@@ -49,6 +49,8 @@ class SelectOldTweet:
                     
                 }
             )
+
+            db.commit()
            
         except exceptions.UncreatedThreadException:
             # スレッドの作成ができない時は処理終了
@@ -62,6 +64,7 @@ class SelectOldTweet:
             if 'thread_id' in locals():
                 log.info('プロセスを終了します。')
                 thread.ThreadId().ExitThread('select_oldtweet.py',thread_id)
+            db.close()
 
 # 処理実行
 SelectOldTweet.run()
