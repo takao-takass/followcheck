@@ -21,10 +21,12 @@ class SelectOldTweet:
                 " INSERT IGNORE INTO queue_delete_tweets "\
                 " ( "\
                 " 		service_user_id, "\
-                " 		tweet_id "\
+                " 		tweet_id, "\
+                "       tweeted_datetime "\
                 " ) "\
                 " SELECT B.service_user_id, "\
-                " 	    B.tweet_id "\
+                " 	    B.tweet_id, "\
+                "       B.tweeted_datetime"\
                 " FROM tweets B "\
                 " LEFT JOIN keep_tweets C "\
                 " ON B.service_user_id = C.service_user_id "\

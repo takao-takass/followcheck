@@ -13,10 +13,10 @@ class DeleteOldTweet:
             # スレッドIDの発行
             thread_id = thread.ThreadId().CreateThread(process_name,max_thread)
             log = logger.ThreadLogging(thread_id)
-            log.info("削除対象のツイートを抽出しています...")
 
             # 処理予約をする。
             # 対象の利用者IDを取得する
+            log.info("削除対象のツイートを抽出しています...")
             db = databeses.DbConnection(log)
             service_user_id_list = db.execute(
                 " SELECT DISTINCT A.service_user_id "\
@@ -31,15 +31,9 @@ class DeleteOldTweet:
                 db.execute(
                     " UPDATE queue_delete_tweets A"\
                     " SET A.thread_id = %(thread_id)s"\
-                    " WHERE (A.service_user_id,A.tweet_id) IN ("\
-                    "             SELECT C.service_user_id, C.tweet_id"\
-                    "             FROM tweets C"\
-                    "             WHERE  A.service_user_id = C.service_user_id"\
-                    "             AND A.tweet_id = C.tweet_id "\
-                    "             ORDER BY C.tweeted_datetime "\
-                    " ) "\
-                    " AND A.service_user_id = %(service_user_id)s "\
+                    " WHERE  A.service_user_id = %(service_user_id)s "\
                     " AND A.`status` = '0'"\
+                    " ORDER BY A.tweeted_datetime "\
                     " LIMIT %(max_rows)s ",
                     {
                         'thread_id':thread_id,
@@ -67,16 +61,22 @@ class DeleteOldTweet:
             )
 
             # メディアファイルを削除する
+            log.info("メディアファイルを削除しています...")
             for media_path in media_path_list:
 
                 media_file_path = media_path['directory_path'] + media_path['file_name']
                 thumb_file_path = media_path['thumb_directory_path'] + media_path['thumb_file_name']
 
                 if os.path.isfile(media_file_path):
+                    log.info(media_file_path)
                     os.remove(media_file_path)
+
+                if os.path.isfile(thumb_file_path):
+                    log.info(thumb_file_path)
                     os.remove(thumb_file_path)
 
             # ツイートメディアレコードを削除する
+            log.info("メディアレコードを削除しています...")
             db.execute(
                 " DELETE FROM tweet_medias A"\
                 " WHERE (A.tweet_id) IN ("\
@@ -91,6 +91,7 @@ class DeleteOldTweet:
             )
 
             # ツイートレコードを削除する
+            log.info("ツイートレコードを削除しています...")
             db.execute(
                 " DELETE FROM tweets A"\
                 " WHERE (A.service_user_id,A.tweet_id) IN ("\
@@ -105,6 +106,7 @@ class DeleteOldTweet:
             )
 
             # キューレコードを削除する
+            log.info("キューレコードを削除しています...")
             db.execute(
                 " DELETE FROM queue_delete_tweets A"\
                 " WHERE A.thread_id = %(thread_id)s",
