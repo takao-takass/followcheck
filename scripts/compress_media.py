@@ -30,6 +30,8 @@ class CompressMedia:
                     'thread_id':thread_id
                 }
             )
+            
+            db.commit()
 
             # 対象のファイル一覧を取得
             results = db.execute(

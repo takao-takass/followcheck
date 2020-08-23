@@ -34,6 +34,7 @@ class CreateThumbnail:
                     'thread_id':thread_id
                 }
             )
+            db.commit()
 
             # 予約したレコードを取得する。
             # サムネイル作成キューから、自プロセス番号のレコードを取得する。

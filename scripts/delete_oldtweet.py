@@ -41,6 +41,8 @@ class DeleteOldTweet:
                         'max_rows':max_rows
                     }
                 )
+                
+                db.commit()
 
             # 予約したレコードを取得する。
             # サムネイル作成キューから、自プロセス番号のレコードを取得する。
@@ -53,7 +55,8 @@ class DeleteOldTweet:
                 " INNER JOIN tweet_medias B"\
                 " ON A.tweet_id = B.tweet_id"\
                 " WHERE A.thread_id = %(thread_id)s"\
-                " AND B.url IS NOT NULL"\
+                " AND B.file_name IS NOT NULL"\
+                " AND B.thumb_file_name IS NOT NULL"\
                 " AND A.`status` = 0",
                 {
                     'thread_id':thread_id
