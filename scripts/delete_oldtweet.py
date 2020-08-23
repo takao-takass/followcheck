@@ -47,7 +47,7 @@ class DeleteOldTweet:
             # 予約したレコードを取得する。
             # サムネイル作成キューから、自プロセス番号のレコードを取得する。
             tweet_id_list = db.execute(
-                " SELECT A.service_user_id,A.tweet_id"\
+                " SELECT A.service_user_id,A.user_id,A.tweet_id"\
                 " FROM queue_delete_tweets A"\
                 " WHERE A.thread_id = %(thread_id)s"\
                 " AND A.`status` = 0",
@@ -102,9 +102,11 @@ class DeleteOldTweet:
                 db.execute(
                     " DELETE FROM tweets A"\
                     " WHERE A.service_user_id = %(service_user_id)s"\
+                    " AND A.user_id = %(user_id)s"\
                     " AND A.tweet_id = %(tweet_id)s",
                     {
                         'service_user_id':tweet_id['service_user_id'],
+                        'user_id':tweet_id['user_id'],
                         'tweet_id':tweet_id['tweet_id']
                     }
                 )
@@ -114,9 +116,11 @@ class DeleteOldTweet:
                 db.execute(
                     " DELETE FROM queue_delete_tweets A"\
                     " WHERE A.service_user_id = %(service_user_id)s"\
+                    " AND A.user_id = %(user_id)s"\
                     " AND A.tweet_id = %(tweet_id)s",
                     {
                         'service_user_id':tweet_id['service_user_id'],
+                        'user_id':tweet_id['user_id'],
                         'tweet_id':tweet_id['tweet_id']
                     }
                 )
