@@ -7,12 +7,12 @@ from classes import logger, thread, databeses, exceptions
 class SelectOldTweet:
 
     @staticmethod
-    def run():
+    def run(max_thread):
 
         try:
             # スレッドIDの発行
             log = logger.ThreadLogging('-')
-            thread_id = thread.ThreadId().CreateThread('select_oldtweet.py',1)
+            thread_id = thread.ThreadId().CreateThread('select_oldtweet.py',max_thread)
             log = logger.ThreadLogging(thread_id)
 
             # 削除対象となるツイートをキューに登録する
@@ -66,5 +66,8 @@ class SelectOldTweet:
                 thread.ThreadId().ExitThread('select_oldtweet.py',thread_id)
             db.close()
 
+# コマンドライン引数 1 : 同時実行スレッドの最大数
+max_thread = int(sys.argv[0])
+
 # 処理実行
-SelectOldTweet.run()
+SelectOldTweet.run(max_thread)
