@@ -46,77 +46,80 @@ class DeleteOldTweet:
 
             # 予約したレコードを取得する。
             # サムネイル作成キューから、自プロセス番号のレコードを取得する。
-            media_path_list = db.execute(
-                " SELECT B.directory_path,"\
-                "         B.file_name,"\
-                "         B.thumb_directory_path,"\
-                "         B.thumb_file_name"\
+            tweet_id_list = db.execute(
+                " SELECT A.service_user_id,A.tweet_id,"\
                 " FROM queue_delete_tweets A"\
-                " INNER JOIN tweet_medias B"\
-                " ON A.tweet_id = B.tweet_id"\
                 " WHERE A.thread_id = %(thread_id)s"\
-                " AND B.file_name IS NOT NULL"\
-                " AND B.thumb_file_name IS NOT NULL"\
                 " AND A.`status` = 0",
                 {
                     'thread_id':thread_id
                 }
             )
 
-            # メディアファイルを削除する
-            log.info("メディアファイルを削除しています...")
-            for media_path in media_path_list:
+            for tweet_id in tweet_id_list:
 
-                media_file_path = media_path['directory_path'] + media_path['file_name']
-                thumb_file_path = media_path['thumb_directory_path'] + media_path['thumb_file_name']
+                media_path_list = db.execute(
+                    " SELECT B.directory_path,"\
+                    "         B.file_name,"\
+                    "         B.thumb_directory_path,"\
+                    "         B.thumb_file_name"\
+                    " FROM tweet_medias B"\
+                    " WHERE B.tweet_id = %(tweet_id)s"\
+                    " AND B.file_name IS NOT NULL"\
+                    " AND B.thumb_file_name IS NOT NULL",
+                    {
+                        'tweet_id':tweet_id['tweet_id']
+                    }
+                )
 
-                if os.path.isfile(media_file_path):
-                    log.info(media_file_path)
-                    os.remove(media_file_path)
+                # メディアファイルを削除する
+                log.info("メディアファイルを削除しています...")
+                for media_path in media_path_list:
 
-                if os.path.isfile(thumb_file_path):
-                    log.info(thumb_file_path)
-                    os.remove(thumb_file_path)
+                    media_file_path = media_path['directory_path'] + media_path['file_name']
+                    thumb_file_path = media_path['thumb_directory_path'] + media_path['thumb_file_name']
 
-            # ツイートメディアレコードを削除する
-            log.info("メディアレコードを削除しています...")
-            db.execute(
-                " DELETE FROM tweet_medias A"\
-                " WHERE (A.tweet_id) IN ("\
-                "         SELECT B.tweet_id"\
-                "         FROM queue_delete_tweets B"\
-                "         WHERE B.thread_id = %(thread_id)s"\
-                "         AND B.`status` = '0'        "\
-                " )",
-                {
-                    'thread_id':thread_id
-                }
-            )
+                    if os.path.isfile(media_file_path):
+                        log.info(media_file_path)
+                        os.remove(media_file_path)
 
-            # ツイートレコードを削除する
-            log.info("ツイートレコードを削除しています...")
-            db.execute(
-                " DELETE FROM tweets A"\
-                " WHERE (A.service_user_id,A.tweet_id) IN ("\
-                "         SELECT B.service_user_id,B.tweet_id"\
-                "         FROM queue_delete_tweets B"\
-                "         WHERE B.thread_id = %(thread_id)s"\
-                "         AND B.`status` = '0'        "\
-                " )",
-                {
-                    'thread_id':thread_id
-                }
-            )
+                    if os.path.isfile(thumb_file_path):
+                        log.info(thumb_file_path)
+                        os.remove(thumb_file_path)
 
-            # キューレコードを削除する
-            log.info("キューレコードを削除しています...")
-            db.execute(
-                " DELETE FROM queue_delete_tweets A"\
-                " WHERE A.thread_id = %(thread_id)s",
-                {
-                    'thread_id':thread_id
-                }
-            )
+                # ツイートメディアレコードを削除する
+                log.info("メディアレコードを削除しています...")
+                db.execute(
+                    " DELETE FROM tweet_medias A"\
+                    " WHERE A.tweet_id = %(tweet_id)s",
+                    {
+                        'tweet_id':tweet_id['tweet_id']
+                    }
+                )
+
+                # ツイートレコードを削除する
+                log.info("ツイートレコードを削除しています...")
+                db.execute(
+                    " DELETE FROM tweets A"\
+                    " WHERE A.service_user_id = %(service_user_id)s",
+                    " AND A.tweet_id = %(tweet_id)s",
+                    {
+                        'service_user_id':tweet_id['service_user_id']
+                        'tweet_id':tweet_id['tweet_id']
+                    }
+                )
+
+                # キューレコードを削除する
+                log.info("キューレコードを削除しています...")
+                db.execute(
+                    " DELETE FROM queue_delete_tweets A"\
+                    " WHERE A.service_user_id = %(service_user_id)s",
+                    " AND A.tweet_id = %(tweet_id)s",
+                    {
+                        'service_user_id':tweet_id['service_user_id']
+                        'tweet_id':tweet_id['tweet_id']
+                    }
+                )
 
 
         except exceptions.UncreatedThreadException:
