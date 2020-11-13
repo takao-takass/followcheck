@@ -133,7 +133,15 @@ class CreateThumbnail:
                             'tweet_id' : result['tweet_id'],
                             'url' : result['url']
                         }
-                    ) 
+                    )
+                    db.execute(
+                        " UPDATE tweets" \
+                        " SET media_ready = 1" \
+                        " WHERE tweet_id = %(tweet_id)s",
+                        {
+                            'tweet_id' : result['tweet_id']
+                        }
+                    )
                     db.execute(
                         " DELETE FROM queue_create_thumbs A" \
                         " WHERE A.tweet_id = %(tweet_id)s" \

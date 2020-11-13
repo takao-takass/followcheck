@@ -237,6 +237,19 @@ while requests_max > 0:
             )
             con.commit()
 
+        # メディア有無のフラグを登録する
+        cursor.execute(
+            " update tweets a"\
+            " set is_media = 1"\
+            " where EXISTS("\
+            "     select 1"\
+            " from followcheck.tweet_medias m"\
+            " where m.tweet_id = a.tweet_id"\
+            " )"\
+            " AND is_media = 0"\
+        )
+        con.commit()
+
         # 対象ユーザの取得に戻る
         requests_max -= 1
 
