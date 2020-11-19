@@ -13,7 +13,7 @@ class CompressMedia:
         try:
             # スレッドIDの発行
             log = logger.ThreadLogging('-')
-            thread_id = thread.ThreadId().CreateThread('compress_media.py',2)
+            thread_id = thread.ThreadId().CreateThread('compress_media.py',1)
             log = logger.ThreadLogging(thread_id)
 
             # 処理予約を行う
@@ -25,7 +25,7 @@ class CompressMedia:
                 " SET A.thread_id = %(thread_id)s"\
                 " WHERE A.`status` = 0"\
                 " AND A.thread_id IS NULL "\
-                " LIMIT 1000",
+                " LIMIT 5000",
                 {
                     'thread_id':thread_id
                 }

@@ -13,7 +13,7 @@ class CreateThumbnail:
         try:
             # スレッドIDの発行
             log = logger.ThreadLogging('-')
-            thread_id = thread.ThreadId().CreateThread('create_thumbnail.py',2)
+            thread_id = thread.ThreadId().CreateThread('create_thumbnail.py',1)
 
             # サムネイルの作成
             log = logger.ThreadLogging(thread_id)
@@ -29,7 +29,7 @@ class CreateThumbnail:
                 " SET A.thread_id = %(thread_id)s"\
                 " WHERE A.`status` = 0"\
                 " AND A.thread_id IS NULL "\
-                " LIMIT 1000",
+                " LIMIT 5000",
                 {
                     'thread_id':thread_id
                 }
