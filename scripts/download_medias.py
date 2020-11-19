@@ -74,7 +74,10 @@ try:
         # 例外が発生したらエラーフラグを設定して続行
         try:
             print("ダウンロード中["+str(count)+"/"+str(len(downloads))+"]...  "+download['url'])
-            urllib.request.urlretrieve(download['url']+":"+size, directory+filename)
+            #urllib.request.urlretrieve(download['url']+":"+size, directory+filename)
+            data = urllib.request.urlopen(download['url']+":"+size, timeout=10).read()
+            with open(directory+filename, mode="wb") as f:
+                f.write(data)
             print("-> tweet_mediasに登録しています...")
             cursor.execute(
                 " UPDATE tweet_medias" \
