@@ -237,19 +237,6 @@ while requests_max > 0:
             )
             con.commit()
 
-        # メディア有無のフラグを登録する
-        cursor.execute(
-            " update tweets a"\
-            " set is_media = 1"\
-            " where EXISTS("\
-            "     select 1"\
-            " from followcheck.tweet_medias m"\
-            " where m.tweet_id = a.tweet_id"\
-            " )"\
-            " AND is_media = 0"\
-        )
-        con.commit()
-
         # 対象ユーザの取得に戻る
         requests_max -= 1
 
@@ -262,6 +249,32 @@ while requests_max > 0:
     finally:
         cursor.close()
         con.close()
+
+
+print("ツイートに対してメディア有無フラグ(is_media)を設定します。")
+con = MySQLdb.connect(
+    host = config.DB_HOST,
+    port = config.DB_PORT,
+    db = config.DB_DATABASE,
+    user = config.DB_USER,
+    passwd = config.DB_PASSWORD,
+    charset = config.DB_CHARSET
+)
+con.autocommit(False)
+cursor = con.cursor(MySQLdb.cursors.DictCursor)
+
+# メディア有無のフラグを登録する
+cursor.execute(
+    " update tweets a" \
+    " set is_media = 1" \
+    " where EXISTS(" \
+    "     select 1" \
+    " from followcheck.tweet_medias m" \
+    " where m.tweet_id = a.tweet_id" \
+    " )" \
+    " AND is_media = 0" \
+    )
+con.commit()
 
 print("APIリクエスト残数："+str(requests_max))
 print("処理は終了しました。")
