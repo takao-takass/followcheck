@@ -30,7 +30,7 @@ try:
         " WHERE A.file_name IS NULL " \
         " AND A.download_error = '0' " \
         " AND A.deleted = '0' " \
-        " LIMIT 3000"
+        " LIMIT 1000"
     )
 
     downloads = []
