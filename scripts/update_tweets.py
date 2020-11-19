@@ -59,6 +59,7 @@ while requests_max > 0:
             " AND A.user_id = '"+userId+"' "\
             " ORDER BY A.tweeted_datetime desc LIMIT 1 "
         )
+        continueTweetId = ''
         for row in cursor:
             continueTweetId= row['tweet_id']
 
