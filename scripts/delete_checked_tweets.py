@@ -24,7 +24,7 @@ class DeleteCheckedTweets:
                 " SELECT service_user_id ,tweet_id"
                 " FROM checked_tweets ct"
                 " WHERE ct.update_datetime <= DATE_SUB(NOW(),INTERVAL 3 DAY)"
-                " LIMIT 2",
+                " LIMIT 1000",
                 {}
             )
 
@@ -47,7 +47,7 @@ class DeleteCheckedTweets:
                     media_file_path = tweet_media['directory_path'] + tweet_media['file_name']
                     thumb_file_path = tweet_media['thumb_directory_path'] + tweet_media['thumb_file_name']
                     log.info('media_file_path：'+media_file_path)
-                    log.info('thumb_file_path：'+media_file_path)
+                    log.info('thumb_file_path：'+thumb_file_path)
 
                     if os.path.isfile(media_file_path):
                         os.remove(media_file_path)
