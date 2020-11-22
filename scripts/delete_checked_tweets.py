@@ -43,19 +43,22 @@ class DeleteCheckedTweets:
                 )
 
                 for tweet_media in tweet_medias:
-                    log.info('メディアのファイルを削除します。')
-                    media_file_path = tweet_media['directory_path'] + tweet_media['file_name']
-                    thumb_file_path = tweet_media['thumb_directory_path'] + tweet_media['thumb_file_name']
-                    log.info('media_file_path：'+media_file_path)
-                    log.info('thumb_file_path：'+thumb_file_path)
 
-                    if os.path.isfile(media_file_path):
-                        os.remove(media_file_path)
-                        log.info('削除しました。：'+media_file_path)
+                    if tweet_media['file_name']:
+                        media_file_path = tweet_media['directory_path'] + tweet_media['file_name']
+                        log.info('メディアのファイルを削除します。：'+media_file_path)
 
-                    if os.path.isfile(thumb_file_path):
-                        os.remove(thumb_file_path)
-                        log.info('削除しました。：'+thumb_file_path)
+                        if os.path.isfile(media_file_path):
+                            os.remove(media_file_path)
+                            log.info('削除しました。：'+media_file_path)
+
+                    if tweet_media['thumb_file_name']:
+                        thumb_file_path = tweet_media['thumb_directory_path'] + tweet_media['thumb_file_name']
+                        log.info('サムネイルファイルを削除します。：'+thumb_file_path)
+
+                        if os.path.isfile(thumb_file_path):
+                            os.remove(thumb_file_path)
+                            log.info('削除しました。：'+thumb_file_path)
 
                 # tweet_mediasの削除
                 log.info('tweet_mediasから削除しています。')
