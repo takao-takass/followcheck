@@ -105,7 +105,7 @@ class DeleteCheckedTweets:
         finally:
             if 'thread_id' in locals():
                 log.info('プロセスを終了します。')
-                thread.ThreadId().ExitThread('create_thumbnail.py', thread_id)
+                thread.ThreadId().ExitThread('delete_checked_tweets.py', thread_id)
 
 
 # 処理実行
