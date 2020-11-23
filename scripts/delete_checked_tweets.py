@@ -24,6 +24,12 @@ class DeleteCheckedTweets:
                 " SELECT service_user_id ,tweet_id"
                 " FROM checked_tweets ct"
                 " WHERE ct.update_datetime <= DATE_SUB(NOW(),INTERVAL 3 DAY)"
+                " AND NOT EXISTS ("
+                "     SELECT 1"
+                "     FROM keep_tweets kt"
+                "     WHERE kt.service_user_id = ct.service_user_id"
+                "     AND kt.tweet_id = ct.tweet_id"
+                " )"
                 " LIMIT 1000",
                 {}
             )
