@@ -1,130 +1,96 @@
-### ツイートに紐づくメディアをダウンロードする
-### 2020-03-14  たかお
+import sys, hashlib, config, cv2
+from PIL import Image
+from classes import logger, thread, databeses, exceptions
 
-import sys,json, MySQLdb,config
-import os
-import urllib.request
-from model.user import User
-from requests_oauthlib import OAuth1Session
 
-con = MySQLdb.connect(
-    host = config.DB_HOST,
-    port = config.DB_PORT,
-    db = config.DB_DATABASE,
-    user = config.DB_USER,
-    passwd = config.DB_PASSWORD,
-    charset = config.DB_CHARSET
-)
-con.autocommit(False)
-cursor = con.cursor(MySQLdb.cursors.DictCursor)
+class DownloadMedias:
 
-try:
-    print("ダウンロードするメディアの情報を確認しています...")
-    cursor.execute(
-        " SELECT A.tweet_id,A.url,C.disp_name,A.sizes,A.`type` " \
-        " FROM tweet_medias A " \
-        " INNER JOIN tweets B " \
-        " ON A.tweet_id = B.tweet_id " \
-        " INNER JOIN relational_users C " \
-        " ON B.user_id = C.user_id " \
-        " WHERE A.file_name IS NULL " \
-        " AND A.download_error = '0' " \
-        " AND A.deleted = '0' " \
-        " LIMIT 1000"
-    )
+    @staticmethod
+    def run():
 
-    downloads = []
-    for row in cursor:
-        downloads.append({
-            'tweet_id':row['tweet_id'],
-            'url':row['url'],
-            'disp_name':row['disp_name'],
-            'sizes':row['sizes'],
-            'type':row['type']
-        })
-    
-    print("ダウンロードするメディア："+str(len(downloads)))
+        """
+        CREATE TABLE `queue_download_medias` (
+          `tweet_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'ツイートID',
+          `url` varchar(400) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'メディアURL',
+          `status` varchar(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '0' COMMENT 'キューのステータス',
+          `thread_id` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '処理を担当しているスレッドID',
+          `error_text` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci COMMENT 'エラーテキスト',
+          `create_datetime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '登録日時',
+          `update_datetime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新日時',
+          PRIMARY KEY (`tweet_id`,`url`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC
+        """
 
-    # メディアをダウンロード
-    count = 0
-    for download in downloads:
-
-        count += 1
-
-        # URLからドメイン･階層とパラメータを除去してファイル名を作る
-        splitedUrl = download['url'].split('/')
-        filename = splitedUrl[len(splitedUrl)-1].split('?')[0]
-
-        # ディレクトリパス（無ければ作る）
-        directory = config.STRAGE_MEDIAS_PATH + download['disp_name'] + '/'
-        if not os.path.exists(directory):
-            os.mkdir(directory)
-
-        # 画像ファイルの対応サイズを判定
-        size = "thumb"
-        if "large" in download['sizes']:
-            size = "large"
-        elif "medium" in download['sizes']:
-            size = "medium"
-        elif "small" in download['sizes']:
-            size = "small"
-        
-        # ダウンロード
-        # 成功したらDBにファイル名とパスを登録
-        # 例外が発生したらエラーフラグを設定して続行
         try:
-            print("ダウンロード中["+str(count)+"/"+str(len(downloads))+"]...  "+download['url'])
-            #urllib.request.urlretrieve(download['url']+":"+size, directory+filename)
-            data = urllib.request.urlopen(download['url']+":"+size, timeout=10).read()
-            with open(directory+filename, mode="wb") as f:
-                f.write(data)
-            print("-> tweet_mediasに登録しています...")
-            cursor.execute(
-                " UPDATE tweet_medias" \
-                " SET file_name = '"+filename+"' " \
-                " ,directory_path = '"+directory+"' " \
-                " ,update_datetime = NOW()" \
-                " WHERE tweet_id = '"+download['tweet_id']+"'" \
-                " AND url = '"+download['url']+"'"
-            ) 
-            print("-> queue_create_thumbsに登録しています...")
-            cursor.execute(
-                " INSERT INTO queue_create_thumbs"\
-                " 	(tweet_id, url)"\
-                " 	VALUES"\
-                " 	('"+download['tweet_id']+"', '"+download['url']+"')"
-            ) 
-            print("-> queue_compress_mediasに登録しています...")
-            cursor.execute(
-                " INSERT INTO queue_compress_medias"\
-                " 	(tweet_id, url)"\
-                " 	VALUES"\
-                " 	('"+download['tweet_id']+"', '"+download['url']+"')"
-            ) 
+            # スレッドIDの発行
+            log = logger.ThreadLogging('-')
+            thread_id = thread.ThreadId().CreateThread('download_medias.py', 1)
+
+            # サムネイルの作成
+            log = logger.ThreadLogging(thread_id)
+            log.info("メディア情報を確認しています...")
+
+            # 処理予約をする。
+            db = databeses.DbConnection(log)
+            db.execute(
+                " UPDATE queue_download_medias"
+                " SET thread_id = %(thread_id)s"
+                " WHERE `status` = 0"
+                " AND thread_id IS NULL "
+                " LIMIT 5000",
+                {
+                    'thread_id': thread_id
+                }
+            )
+            db.commit()
+
+            download_medias = db.execute(
+                " SELECT A.tweet_id,A.url,C.disp_name,A.sizes,A.`type` "
+                " FROM queue_download_medias qdm"
+                " INNER JOIN tweet_medias tm"
+                " ON qdm.tweet_id = tm.tweet_id"
+                " AND qdm.url = tm.url "
+                " INNER JOIN tweets tw"
+                " ON tm.tweet_id = tw.tweet_id"
+                " INNER JOIN relational_users ru"
+                " ON tw.user_id = ru.user_id"
+                " WHERE qdm.thread_id = %(thread_id)s",
+                {
+                    'thread_id': thread_id
+                }
+            )
+
+            for download_media in download_medias:
+                
+                splited_usls = download_media['url'].split('/')
+                filename = splited_usls[len(splited_usls)-1].split('?')[0]
+
+
+
+
+                # download_mediaws_bk.py および create_thumbnail.py を参考に実装する。
+
+
+
+
+
+
+
+
+
+        except exceptions.UncreatedThreadException:
+            # スレッドの作成ができない時は処理終了
+            sys.exit()
 
         except Exception as e:
-            print("-> エラーが発生しました。ステータスを更新します。")
-            print("ERROR: ",e)
-            cursor.execute(
-                " UPDATE tweet_medias" \
-                " SET download_error = 1 " \
-                " ,update_datetime = NOW()" \
-                " WHERE tweet_id = '"+download['tweet_id']+"'" \
-                " AND url = '"+download['url']+"'"
-            ) 
-        
+            log.error(e)
+            sys.exit()
+
         finally:
-            con.commit()
-
-except Exception as e:
-    con.rollback()
-    print("ERROR: ",e)
-    print("エラーが発生しました。処理を終了します。")
-    sys.exit()
-
-finally:
-    cursor.close()
-    con.close()
+            if 'thread_id' in locals():
+                log.info('プロセスを終了します。')
+                thread.ThreadId().ExitThread('download_medias.py', thread_id)
 
 
-print("処理は終了しました。")
+# 処理実行
+DownloadMedias.run()
