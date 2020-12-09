@@ -190,28 +190,39 @@ while requests_max > 0:
         print(str(len(tweets))+"件のメディアを登録しています...")
         for media in tweetMedias:
             cursor.execute(
-                " INSERT INTO tweet_medias (" \
-                " 	tweet_id" \
-                " 	,url" \
-                " 	,type" \
-                " 	,sizes" \
-                " 	,bitrate" \
-                " 	,file_name" \
-                " 	,directory_path" \
-                " 	,create_datetime" \
-                " 	,update_datetime" \
-                " ) VALUES (" \
-                " 	'"+media['tweet_id']+"'" \
-                " 	,'"+media['url']+"'" \
-                " 	,'"+media['type']+"'" \
-                " 	,'"+media['sizes']+"'" \
-                " 	,'"+str(media['bitrate'])+"'" \
-                " 	,null" \
-                " 	,null" \
-                " 	,NOW()" \
-                " 	,NOW()" \
+                " INSERT INTO tweet_medias ("
+                " 	tweet_id"
+                " 	,url"
+                " 	,type"
+                " 	,sizes"
+                " 	,bitrate"
+                " 	,file_name"
+                " 	,directory_path"
+                " 	,create_datetime"
+                " 	,update_datetime"
+                " ) VALUES ("
+                " 	'"+media['tweet_id']+"'"
+                " 	,'"+media['url']+"'"
+                " 	,'"+media['type']+"'"
+                " 	,'"+media['sizes']+"'"
+                " 	,'"+str(media['bitrate'])+"'"
+                " 	,null"
+                " 	,null"
+                " 	,NOW()"
+                " 	,NOW()"
                 " )"
-                " ON DUPLICATE KEY UPDATE " \
+                " ON DUPLICATE KEY UPDATE "
+                " 	update_datetime = NOW() /*既に登録済みの場合は更新日時のみ更新*/ "
+            )
+            cursor.execute(
+                " INSERT INTO queue_download_medias ("
+                " 	tweet_id"
+                " 	,url"
+                " ) VALUES ("
+                " 	'"+media['tweet_id']+"'"
+                " 	,'"+media['url']+"'"
+                " )"
+                " ON DUPLICATE KEY UPDATE "
                 " 	update_datetime = NOW() /*既に登録済みの場合は更新日時のみ更新*/ "
             )
 
