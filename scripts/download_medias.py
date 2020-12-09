@@ -36,7 +36,7 @@ class DownloadMedias:
             db.commit()
 
             download_medias = db.execute(
-                " SELECT A.tweet_id,A.url,C.disp_name,A.sizes,A.`type` "
+                " SELECT qdm.tweet_id,qdm.url,ru.disp_name,tm.sizes,tm.`type` "
                 " FROM queue_download_medias qdm"
                 " INNER JOIN tweet_medias tm"
                 " ON qdm.tweet_id = tm.tweet_id"
