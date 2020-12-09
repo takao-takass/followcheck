@@ -2,6 +2,7 @@ import os
 import sys
 import config
 import urllib
+import urllib.request
 
 from PIL import Image
 from classes import logger, thread, databeses, exceptions
