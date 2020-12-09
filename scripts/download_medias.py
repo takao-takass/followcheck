@@ -107,11 +107,33 @@ class DownloadMedias:
                             'url': download_media['url']
                         }
                     )
+                    db.execute(
+                        " DELETE FROM queue_download_medias A"
+                        " WHERE A.tweet_id = %(tweet_id)s"
+                        " AND A.url = %(url)s",
+                        {
+                            'tweet_id': download_media['tweet_id'],
+                            'url': download_media['url']
+                        }
+                    )
+                    db.commit()
 
 
                 except Exception as e:
                     log.error(e)
-
+                    db.execute(
+                        " UPDATE queue_download_medias A"
+                        " SET A.`status` = 9"
+                        "    ,A.error_text = %(error_text)s"
+                        " WHERE A.tweet_id = %(tweet_id)s"
+                        " AND A.url = %(url)s",
+                        {
+                            'error_text': str(e),
+                            'tweet_id': download_media['tweet_id'],
+                            'url': download_media['url']
+                        }
+                    )
+                    db.commit()
 
         except exceptions.UncreatedThreadException:
             # スレッドの作成ができない時は処理終了
