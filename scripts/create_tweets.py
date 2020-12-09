@@ -202,6 +202,17 @@ while requests_max > 0:
                 " ON DUPLICATE KEY UPDATE " \
                 " 	update_datetime = NOW() /*既に登録済みの場合は更新日時のみ更新*/ "
             )
+            cursor.execute(
+                " INSERT INTO queue_download_medias ("
+                " 	tweet_id"
+                " 	,url"
+                " ) VALUES ("
+                " 	'"+media['tweet_id']+"'"
+                " 	,'"+media['url']+"'"
+                " )"
+                " ON DUPLICATE KEY UPDATE "
+                " 	update_datetime = NOW() /*既に登録済みの場合は更新日時のみ更新*/ "
+            )
 
         # リツイート元の投稿主をDBに登録
         print(str(len(other_user_id))+"件のリツイート元の投稿主を登録しています...")

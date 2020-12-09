@@ -1,9 +1,7 @@
-### 画像メディアのサムネイルを作成する
-### 2020-07-14  たかお
-
 import sys, hashlib, config, cv2
 from PIL import Image
 from classes import logger, thread, databeses, exceptions
+
 
 class CreateThumbnail:
 
@@ -13,7 +11,7 @@ class CreateThumbnail:
         try:
             # スレッドIDの発行
             log = logger.ThreadLogging('-')
-            thread_id = thread.ThreadId().CreateThread('create_thumbnail.py',1)
+            thread_id = thread.ThreadId().CreateThread('create_thumbnail.py', 1)
 
             # サムネイルの作成
             log = logger.ThreadLogging(thread_id)
@@ -25,13 +23,13 @@ class CreateThumbnail:
             #     登録数のMAXはコマンドライン引数で受け取る。
             db = databeses.DbConnection(log)
             db.execute(
-                " UPDATE queue_create_thumbs A"\
-                " SET A.thread_id = %(thread_id)s"\
-                " WHERE A.`status` = 0"\
-                " AND A.thread_id IS NULL "\
+                " UPDATE queue_create_thumbs A"
+                " SET A.thread_id = %(thread_id)s"
+                " WHERE A.`status` = 0"
+                " AND A.thread_id IS NULL "
                 " LIMIT 5000",
                 {
-                    'thread_id':thread_id
+                    'thread_id': thread_id
                 }
             )
             db.commit()
@@ -39,19 +37,19 @@ class CreateThumbnail:
             # 予約したレコードを取得する。
             # サムネイル作成キューから、自プロセス番号のレコードを取得する。
             results = db.execute(
-                " SELECT A.tweet_id, A.url, B.`type`, B.file_name, B.directory_path, D.disp_name"\
-                " FROM queue_create_thumbs A"\
-                " INNER JOIN tweet_medias B"\
-                " ON A.tweet_id = B.tweet_id"\
-                " AND A.url = B.url"\
-                " INNER JOIN tweets C"\
-                " ON B.tweet_id = C.tweet_id"\
-                " INNER JOIN relational_users D"\
-                " ON C.user_id = D.user_id"\
-                " WHERE A.thread_id = %(thread_id)s"\
+                " SELECT A.tweet_id, A.url, B.`type`, B.file_name, B.directory_path, D.disp_name"
+                " FROM queue_create_thumbs A"
+                " INNER JOIN tweet_medias B"
+                " ON A.tweet_id = B.tweet_id"
+                " AND A.url = B.url"
+                " INNER JOIN tweets C"
+                " ON B.tweet_id = C.tweet_id"
+                " INNER JOIN relational_users D"
+                " ON C.user_id = D.user_id"
+                " WHERE A.thread_id = %(thread_id)s"
                 " AND A.`status` = 0",
                 {
-                    'thread_id':thread_id
+                    'thread_id': thread_id
                 }
             )
 
@@ -67,14 +65,14 @@ class CreateThumbnail:
                     thumbName = hashlib.md5(originText.encode()).hexdigest() + ".jpg"
 
                     # 画像メディアの読み込み
-                    if result['type'] in ('photo','animated_gif'):
-                        log.info("画像サムネイルを作成しています["+result['directory_path']+result['file_name']+"]...")
+                    if result['type'] in ('photo', 'animated_gif'):
+                        log.info("画像サムネイルを作成しています[" + result['directory_path'] + result['file_name'] + "]...")
                         log.info(" -> 画像を読み込みます...")
                         original = Image.open(result['directory_path'] + result['file_name']).convert('RGB')
 
                     # 動画メディアの読み込み
                     elif result['type'] in ('video'):
-                        log.info("動画サムネイルを作成しています["+result['directory_path']+result['file_name']+"]...")
+                        log.info("動画サムネイルを作成しています[" + result['directory_path'] + result['file_name'] + "]...")
                         log.info(" -> 動画を読み込みます...")
                         video = cv2.VideoCapture(result['directory_path'] + result['file_name'])
                         if not video.isOpened():
@@ -90,18 +88,17 @@ class CreateThumbnail:
                         log.info(" -> 保存したフレームを読み込みます...")
                         original = Image.open(stragePath + thumbName).convert('RGB')
 
-
                     # 長辺は縦・横のどちらか？
                     #  -> 縦の場合は、横360pxになるように縮小する
                     #  -> 横の場合は、縦260pxになるように縮小する
                     #  -> 同じ場合は、縦260pxになるように縮小する
                     log.info(" -> 画像を縮小しています...")
-                    width,height = original.size
+                    width, height = original.size
                     scale = 0.0
-                    if width > height :
+                    if width > height:
                         # 横が長辺
                         scale = 260.0 / height
-                    else :
+                    else:
                         # 縦が長辺
                         scale = 360.0 / width
 
@@ -111,46 +108,46 @@ class CreateThumbnail:
                     # サムネイルのトリミングを行う
                     #  -> サイズは360×260
                     log.info(" -> 画像をトリミングしています...")
-                    thumb = original.crop((0,0,360,260))
+                    thumb = original.crop((0, 0, 360, 260))
 
                     # サムネイルを保存する
                     log.info(" -> サムネイルを保存しています...")
                     thumb.save(stragePath + thumbName, quality=80)
-                    log.info(" -> サムネイルを保存しました。["+stragePath + thumbName+"]")
+                    log.info(" -> サムネイルを保存しました。[" + stragePath + thumbName + "]")
 
                     # データベースにサムネイル情報を登録し、キューからレコードを削除する
                     log.info(" -> データベースにサムネイル情報を登録しています...")
                     db.execute(
-                        " UPDATE tweet_medias" \
-                        " SET thumb_file_name = %(thumb_name)s" \
-                        " ,thumb_directory_path = %(strage_path)s" \
-                        " ,update_datetime = NOW()" \
-                        " WHERE tweet_id = %(tweet_id)s" \
+                        " UPDATE tweet_medias"
+                        " SET thumb_file_name = %(thumb_name)s"
+                        " ,thumb_directory_path = %(strage_path)s"
+                        " ,update_datetime = NOW()"
+                        " WHERE tweet_id = %(tweet_id)s"
                         " AND url = %(url)s",
                         {
-                            'thumb_name' : thumbName,
-                            'strage_path' : stragePath,
-                            'tweet_id' : result['tweet_id'],
-                            'url' : result['url']
+                            'thumb_name': thumbName,
+                            'strage_path': stragePath,
+                            'tweet_id': result['tweet_id'],
+                            'url': result['url']
                         }
                     )
                     db.execute(
-                        " UPDATE tweets" \
-                        " SET media_ready = 1" \
+                        " UPDATE tweets"
+                        " SET media_ready = 1"
                         " WHERE tweet_id = %(tweet_id)s",
                         {
-                            'tweet_id' : result['tweet_id']
+                            'tweet_id': result['tweet_id']
                         }
                     )
                     db.execute(
-                        " DELETE FROM queue_create_thumbs A" \
-                        " WHERE A.tweet_id = %(tweet_id)s" \
+                        " DELETE FROM queue_create_thumbs A"
+                        " WHERE A.tweet_id = %(tweet_id)s"
                         " AND A.url = %(url)s",
                         {
-                            'tweet_id' : result['tweet_id'],
-                            'url' : result['url']
+                            'tweet_id': result['tweet_id'],
+                            'url': result['url']
                         }
-                    ) 
+                    )
                     db.commit()
                     log.info(" -> 登録しました。")
 
@@ -158,19 +155,19 @@ class CreateThumbnail:
                     # 例外が発生したレコードはステータスを更新する
                     log.error(e)
                     db.execute(
-                        " UPDATE queue_create_thumbs A"\
-                        " SET A.`status` = 9"\
-                        "    ,A.error_text = %(error_text)s" \
-                        " WHERE A.tweet_id = %(tweet_id)s"\
+                        " UPDATE queue_create_thumbs A"
+                        " SET A.`status` = 9"
+                        "    ,A.error_text = %(error_text)s"
+                        " WHERE A.tweet_id = %(tweet_id)s"
                         " AND A.url = %(url)s",
                         {
-                            'error_text' : str(e),
-                            'tweet_id' : result['tweet_id'],
-                            'url' : result['url']
+                            'error_text': str(e),
+                            'tweet_id': result['tweet_id'],
+                            'url': result['url']
                         }
                     )
                     db.commit()
-           
+
         except exceptions.UncreatedThreadException:
             # スレッドの作成ができない時は処理終了
             sys.exit()
@@ -178,11 +175,12 @@ class CreateThumbnail:
         except Exception as e:
             log.error(e)
             sys.exit()
-        
+
         finally:
             if 'thread_id' in locals():
                 log.info('プロセスを終了します。')
-                thread.ThreadId().ExitThread('create_thumbnail.py',thread_id)
+                thread.ThreadId().ExitThread('create_thumbnail.py', thread_id)
+
 
 # 処理実行
 CreateThumbnail.run()
