@@ -51,7 +51,7 @@ class DownloadMedias:
                 }
             )
 
-            log.info("ダウンロード件数：" + str(len(download_medias)))
+            log.info("ダウンロードを開始します。")
             for download_media in download_medias:
 
                 splited_usls = download_media['url'].split('/')
