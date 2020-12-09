@@ -1,5 +1,6 @@
 import os
-import sys, hashlib, config, cv2
+import sys
+import config
 import urllib
 
 from PIL import Image
@@ -10,19 +11,6 @@ class DownloadMedias:
 
     @staticmethod
     def run():
-
-        """
-        CREATE TABLE `queue_download_medias` (
-          `tweet_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'ツイートID',
-          `url` varchar(400) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'メディアURL',
-          `status` varchar(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '0' COMMENT 'キューのステータス',
-          `thread_id` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '処理を担当しているスレッドID',
-          `error_text` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci COMMENT 'エラーテキスト',
-          `create_datetime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '登録日時',
-          `update_datetime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新日時',
-          PRIMARY KEY (`tweet_id`,`url`)
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC
-        """
 
         try:
             # スレッドIDの発行
