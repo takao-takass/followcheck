@@ -1,6 +1,3 @@
-### ユーザの全てのツイートを取得する
-### 2020-03-14  たかお
-
 import sys,json, MySQLdb,config
 from model.user import User
 from requests_oauthlib import OAuth1Session
@@ -32,12 +29,12 @@ while requests_max > 0:
         # 対象のユーザを取得する
         print("ツイート取得対象のユーザを確認しています...")
         cursor.execute(
-            " SELECT A.service_user_id, A.user_id, B.disp_name, A.continue_tweet_id, A.include_retweet " \
-            " FROM tweet_take_users A " \
-            " INNER JOIN relational_users B " \
-            " ON A.user_id = B.user_id " \
-            " WHERE A.status IN ('0','1') "\
-            " AND B.icecream = 0" \
+            " SELECT A.service_user_id, A.user_id, B.disp_name, A.continue_tweet_id, A.include_retweet " 
+            " FROM tweet_take_users A " 
+            " INNER JOIN relational_users B " 
+            " ON A.user_id = B.user_id " 
+            " WHERE A.status IN ('0','1') "
+            " AND B.icecream = 0" 
             " ORDER BY A.status desc LIMIT 1 "
         )
 
@@ -120,6 +117,8 @@ while requests_max > 0:
                                     'url':variant['url']
                                 }
                         tweetMedias.append({
+                            'service_user_id':serviceUserId,
+                            'user_id':userId,
                             'tweet_id':statuse['id_str'],
                             'url':videoMedia['url'],
                             'type':media['type'],
@@ -130,6 +129,8 @@ while requests_max > 0:
                     # 画像メディアとその他のメディア
                     else:
                         tweetMedias.append({
+                            'service_user_id':serviceUserId,
+                            'user_id':userId,
                             'tweet_id':statuse['id_str'],
                             'url':media['media_url'],
                             'type':media['type'],
@@ -141,36 +142,36 @@ while requests_max > 0:
         print(str(len(tweets))+"件のツイートを登録しています...")
         for tweet in tweets:
             cursor.execute(
-                " INSERT INTO tweets (" \
-                " 	service_user_id" \
-                " 	,user_id" \
-                " 	,tweet_id" \
-                " 	,tweet_user_id" \
-                " 	,body" \
-                " 	,tweeted_datetime" \
-                " 	,favolite_count" \
-                " 	,retweet_count" \
-                " 	,replied" \
-                " 	,retweeted" \
-                " 	,create_datetime" \
-                " 	,update_datetime" \
-                " 	,deleted" \
-                " ) VALUES (" \
-                " 	 '"+serviceUserId+"'" \
-                " 	,'"+tweet['user_id']+"'" \
-                " 	,'"+tweet['tweet_id']+"'" \
-                " 	,'"+tweet['tweet_user_id']+"'" \
-                " 	,'"+tweet['body'].replace("'","").replace("/","").replace("%","").replace("\\","")+"'" \
-                " 	,STR_TO_DATE('"+tweet['tweeted_datetime']+"','%a %b %d %H:%i:%s +0000 %Y')" \
-                " 	,"+str(tweet['favolite_count'])+"" \
-                " 	,"+str(tweet['retweet_count'])+"" \
-                " 	,"+tweet['replied']+"" \
-                " 	,"+tweet['retweeted']+"" \
-                " 	,NOW()" \
-                " 	,NOW()" \
-                " 	,0" \
-                " )" \
-                " ON DUPLICATE KEY UPDATE " \
+                " INSERT INTO tweets (" 
+                " 	service_user_id" 
+                " 	,user_id" 
+                " 	,tweet_id" 
+                " 	,tweet_user_id" 
+                " 	,body" 
+                " 	,tweeted_datetime" 
+                " 	,favolite_count" 
+                " 	,retweet_count" 
+                " 	,replied" 
+                " 	,retweeted" 
+                " 	,create_datetime" 
+                " 	,update_datetime" 
+                " 	,deleted" 
+                " ) VALUES (" 
+                " 	,'"+tweet['service_user_id']+"'" 
+                " 	,'"+tweet['user_id']+"'" 
+                " 	,'"+tweet['tweet_id']+"'" 
+                " 	,'"+tweet['tweet_user_id']+"'" 
+                " 	,'"+tweet['body'].replace("'","").replace("/","").replace("%","").replace("\\","")+"'" 
+                " 	,STR_TO_DATE('"+tweet['tweeted_datetime']+"','%a %b %d %H:%i:%s +0000 %Y')" 
+                " 	,"+str(tweet['favolite_count'])+"" 
+                " 	,"+str(tweet['retweet_count'])+"" 
+                " 	,"+tweet['replied']+"" 
+                " 	,"+tweet['retweeted']+"" 
+                " 	,NOW()" 
+                " 	,NOW()" 
+                " 	,0" 
+                " )" 
+                " ON DUPLICATE KEY UPDATE " 
                 " 	update_datetime = NOW() /*既に登録済みの場合は更新日時のみ更新*/ "
             )
 
@@ -178,36 +179,44 @@ while requests_max > 0:
         print(str(len(tweets))+"件のメディアを登録しています...")
         for media in tweetMedias:
             cursor.execute(
-                " INSERT INTO tweet_medias (" \
-                " 	tweet_id" \
-                " 	,url" \
-                " 	,type" \
-                " 	,sizes" \
-                " 	,bitrate" \
-                " 	,file_name" \
-                " 	,directory_path" \
-                " 	,create_datetime" \
-                " 	,update_datetime" \
-                " ) VALUES (" \
-                " 	'"+media['tweet_id']+"'" \
-                " 	,'"+media['url']+"'" \
-                " 	,'"+media['type']+"'" \
-                " 	,'"+media['sizes']+"'" \
-                " 	,'"+str(media['bitrate'])+"'" \
-                " 	,null" \
-                " 	,null" \
-                " 	,NOW()" \
-                " 	,NOW()" \
+                " INSERT INTO tweet_medias (" 
+                " 	service_user_id" 
+                " 	,user_id" 
+                " 	,tweet_id" 
+                " 	,url" 
+                " 	,type" 
+                " 	,sizes" 
+                " 	,bitrate" 
+                " 	,file_name" 
+                " 	,directory_path" 
+                " 	,create_datetime" 
+                " 	,update_datetime" 
+                " ) VALUES (" 
+                " 	,'"+media['service_user_id']+"'" 
+                " 	,'"+media['user_id']+"'" 
+                " 	,'"+media['tweet_id']+"'" 
+                " 	,'"+media['url']+"'" 
+                " 	,'"+media['type']+"'" 
+                " 	,'"+media['sizes']+"'" 
+                " 	,'"+str(media['bitrate'])+"'" 
+                " 	,null" 
+                " 	,null" 
+                " 	,NOW()" 
+                " 	,NOW()" 
                 " )"
-                " ON DUPLICATE KEY UPDATE " \
+                " ON DUPLICATE KEY UPDATE " 
                 " 	update_datetime = NOW() /*既に登録済みの場合は更新日時のみ更新*/ "
             )
             cursor.execute(
                 " INSERT INTO queue_download_medias ("
-                " 	tweet_id"
+                "   service_user_id "
+                "   ,user_id "
+                " 	,tweet_id"
                 " 	,url"
                 " ) VALUES ("
-                " 	'"+media['tweet_id']+"'"
+                " 	 '"+media['service_user_id']+"'" 
+                " 	,'"+media['user_id']+"'" 
+                " 	,'"+media['tweet_id']+"'"
                 " 	,'"+media['url']+"'"
                 " )"
                 " ON DUPLICATE KEY UPDATE "
@@ -218,10 +227,10 @@ while requests_max > 0:
         print(str(len(other_user_id))+"件のリツイート元の投稿主を登録しています...")
         for user_id in other_user_id:
             cursor.execute(
-                "INSERT INTO relational_users"\
-                "(user_id, disp_name, name)"\
+                "INSERT INTO relational_users"
+                "(user_id, disp_name, name)"
                 "VALUES ('" +  user_id  + "', '　', '　')"
-                " ON DUPLICATE KEY UPDATE " \
+                " ON DUPLICATE KEY UPDATE "
                 " 	update_datetime = NOW() /*既に登録済みの場合は更新日時のみ更新*/ "
             )
 
@@ -229,21 +238,21 @@ while requests_max > 0:
         # MAX件数を取得できなくなったらツイート取得を終了する
         if len(statuses) <= 1:
             cursor.execute(
-                " UPDATE tweet_take_users" \
-                " SET status = '9'" \
-                " ,continue_tweet_id = null" \
-                " ,update_datetime = NOW()" \
-                " WHERE service_user_id = '"+serviceUserId+"'" \
+                " UPDATE tweet_take_users"
+                " SET status = '9'"
+                " ,continue_tweet_id = null"
+                " ,update_datetime = NOW()"
+                " WHERE service_user_id = '"+serviceUserId+"'"
                 " AND user_id = '"+userId+"'"
             )
             con.commit()
         else:
             cursor.execute(
-                " UPDATE tweet_take_users" \
-                " SET status = '1'" \
-                " ,continue_tweet_id = '"+tweets[len(tweets)-1]['tweet_id']+"'" \
-                " ,update_datetime = NOW()" \
-                " WHERE service_user_id = '"+serviceUserId+"'" \
+                " UPDATE tweet_take_users"
+                " SET status = '1'"
+                " ,continue_tweet_id = '"+tweets[len(tweets)-1]['tweet_id']+"'"
+                " ,update_datetime = NOW()"
+                " WHERE service_user_id = '"+serviceUserId+"'"
                 " AND user_id = '"+userId+"'"
             )
             con.commit()
@@ -276,14 +285,14 @@ cursor = con.cursor(MySQLdb.cursors.DictCursor)
 
 # メディア有無のフラグを登録する
 cursor.execute(
-    " update tweets a" \
-    " set is_media = 1" \
-    " where EXISTS(" \
-    "     select 1" \
-    " from followcheck.tweet_medias m" \
-    " where m.tweet_id = a.tweet_id" \
-    " )" \
-    " AND is_media = 0" \
+    " update tweets a"
+    " set is_media = 1"
+    " where EXISTS("
+    "     select 1"
+    " from tweet_medias m"
+    " where m.tweet_id = a.tweet_id"
+    " )"
+    " AND is_media = 0"
     )
 con.commit()
 
