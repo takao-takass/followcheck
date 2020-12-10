@@ -37,7 +37,7 @@ class DownloadMedias:
             db.commit()
 
             download_medias = db.execute(
-                " SELECT qdm.tweet_id,qdm.url,ru.disp_name,tm.sizes,tm.`type` "
+                " SELECT qdm.service_user_id,qdm.user_id,qdm.tweet_id,qdm.url,ru.disp_name,tm.sizes,tm.`type` "
                 " FROM queue_download_medias qdm"
                 " INNER JOIN tweet_medias tm"
                 " ON qdm.tweet_id = tm.tweet_id"
@@ -59,7 +59,7 @@ class DownloadMedias:
                 file_name = splited_usls[len(splited_usls) - 1].split('?')[0]
 
                 # ディレクトリパス（無ければ作る）
-                directory_path = config.STRAGE_MEDIAS_PATH + download_media['disp_name'] + '/'
+                directory_path = config.STRAGE_MEDIAS_PATH + download_media['service_user_id'] + '_' + download_media['disp_name'] + '/'
                 if not os.path.exists(directory_path):
                     os.mkdir(directory_path)
 
@@ -82,36 +82,48 @@ class DownloadMedias:
                         " UPDATE tweet_medias"
                         " SET file_name = %(file_name)s"
                         "    ,directory_path = %(directory_path)s"
-                        " WHERE tweet_id = %(tweet_id)s"
+                        " WHERE service_user_id = %(service_user_id)s"
+                        " AND user_id = %(user_id)s"
+                        " AND tweet_id = %(tweet_id)s"
                         " AND url = %(url)s",
                         {
                             'file_name': file_name,
                             'directory_path': directory_path,
+                            'service_user_id': download_media['service_user_id'],
+                            'user_id': download_media['user_id'],
                             'tweet_id': download_media['tweet_id'],
                             'url': download_media['url']
                         }
                     )
                     db.execute(
-                        " INSERT INTO queue_create_thumbs (tweet_id, url)"
-                        " VALUES ( %(tweet_id)s, %(url)s)",
+                        " INSERT INTO queue_create_thumbs (service_user_id, user_id, tweet_id, url)"
+                        " VALUES ( %(service_user_id)s, %(user_id)s, %(tweet_id)s, %(url)s)",
                         {
+                            'service_user_id': download_media['service_user_id'],
+                            'user_id': download_media['user_id'],
                             'tweet_id': download_media['tweet_id'],
                             'url': download_media['url']
                         }
                     )
                     db.execute(
-                        " INSERT INTO queue_compress_medias (tweet_id, url)"
-                        " VALUES ( %(tweet_id)s, %(url)s)",
+                        " INSERT INTO queue_compress_medias (service_user_id, user_id, tweet_id, url)"
+                        " VALUES ( %(service_user_id)s, %(user_id)s, %(tweet_id)s, %(url)s)",
                         {
+                            'service_user_id': download_media['service_user_id'],
+                            'user_id': download_media['user_id'],
                             'tweet_id': download_media['tweet_id'],
                             'url': download_media['url']
                         }
                     )
                     db.execute(
                         " DELETE FROM queue_download_medias A"
-                        " WHERE A.tweet_id = %(tweet_id)s"
+                        " WHERE A.service_user_id = %(service_user_id)s"
+                        " AND A.user_id = %(user_id)s"
+                        " AND A.tweet_id = %(tweet_id)s"
                         " AND A.url = %(url)s",
                         {
+                            'service_user_id': download_media['service_user_id'],
+                            'user_id': download_media['user_id'],
                             'tweet_id': download_media['tweet_id'],
                             'url': download_media['url']
                         }
@@ -125,10 +137,14 @@ class DownloadMedias:
                         " UPDATE queue_download_medias A"
                         " SET A.`status` = 9"
                         "    ,A.error_text = %(error_text)s"
-                        " WHERE A.tweet_id = %(tweet_id)s"
+                        " WHERE A.service_user_id = %(service_user_id)s"
+                        " AND A.user_id = %(user_id)s"
+                        " AND A.tweet_id = %(tweet_id)s"
                         " AND A.url = %(url)s",
                         {
                             'error_text': str(e),
+                            'service_user_id': download_media['service_user_id'],
+                            'user_id': download_media['user_id'],
                             'tweet_id': download_media['tweet_id'],
                             'url': download_media['url']
                         }
