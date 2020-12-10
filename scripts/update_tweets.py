@@ -204,7 +204,7 @@ while requests_max > 0:
                 " 	,create_datetime"
                 " 	,update_datetime"
                 " ) VALUES ("
-                " 	,'"+media['service_user_id']+"'"
+                " 	 '"+media['service_user_id']+"'"
                 " 	,'"+media['user_id']+"'"
                 " 	,'"+media['tweet_id']+"'"
                 " 	,'"+media['url']+"'"
