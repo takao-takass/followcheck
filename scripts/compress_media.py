@@ -1,6 +1,3 @@
-### メディアの容量を圧縮する
-### 2020-08-09  たかお
-
 import sys, hashlib, config, cv2
 from PIL import Image
 from classes import logger, thread, databeses, exceptions
@@ -21,10 +18,10 @@ class CompressMedia:
             #     ステータスが「0：準備完了」かつ、プロセス番号が空。
             db = databeses.DbConnection(log)
             db.execute(
-                " UPDATE queue_compress_medias A"\
-                " SET A.thread_id = %(thread_id)s"\
-                " WHERE A.`status` = 0"\
-                " AND A.thread_id IS NULL "\
+                " UPDATE queue_compress_medias A"
+                " SET A.thread_id = %(thread_id)s"
+                " WHERE A.`status` = 0"
+                " AND A.thread_id IS NULL "
                 " LIMIT 5000",
                 {
                     'thread_id':thread_id
@@ -35,12 +32,12 @@ class CompressMedia:
 
             # 対象のファイル一覧を取得
             results = db.execute(
-                " SELECT A.tweet_id, A.url, B.`type`, B.file_name, B.directory_path"\
-                " FROM queue_compress_medias A"\
-                " INNER JOIN tweet_medias B"\
-                " ON A.tweet_id = B.tweet_id"\
-                " AND A.url = B.url"\
-                " WHERE A.thread_id = %(thread_id)s"\
+                " SELECT A.service_user_id,A.user_id,A.tweet_id, A.url, B.`type`, B.file_name, B.directory_path"
+                " FROM queue_compress_medias A"
+                " INNER JOIN tweet_medias B"
+                " ON A.tweet_id = B.tweet_id"
+                " AND A.url = B.url"
+                " WHERE A.thread_id = %(thread_id)s"
                 " AND A.`status` = 0",
                 {
                     'thread_id':thread_id
@@ -60,10 +57,14 @@ class CompressMedia:
 
                     # 圧縮が完了したらキューから削除する
                     db.execute(
-                        " DELETE FROM queue_compress_medias A" \
-                        " WHERE A.tweet_id = %(tweet_id)s" \
+                        " DELETE FROM queue_compress_medias A" 
+                        " WHERE A.service_user_id = %(service_user_id)s" 
+                        " AND A.user_id = %(user_id)s" 
+                        " AND A.tweet_id = %(tweet_id)s" 
                         " AND A.url = %(url)s",
                         {
+                            'service_user_id' : result['service_user_id'],
+                            'user_id' : result['user_id'],
                             'tweet_id' : result['tweet_id'],
                             'url' : result['url']
                         }
@@ -74,13 +75,17 @@ class CompressMedia:
                     # 例外が発生したレコードはステータスを更新する
                     log.error(e)
                     db.execute(
-                        " UPDATE queue_compress_medias A"\
-                        " SET A.`status` = 9"\
-                        "    ,A.error_text = %(error_text)s" \
-                        " WHERE A.tweet_id = %(tweet_id)s"\
+                        " UPDATE queue_compress_medias A"
+                        " SET A.`status` = 9"
+                        "    ,A.error_text = %(error_text)s" 
+                        " WHERE A.service_user_id = %(service_user_id)s" 
+                        " AND A.user_id = %(user_id)s" 
+                        " AND A.tweet_id = %(tweet_id)s" 
                         " AND A.url = %(url)s",
                         {
                             'error_text' : str(e),
+                            'service_user_id' : result['service_user_id'],
+                            'user_id' : result['user_id'],
                             'tweet_id' : result['tweet_id'],
                             'url' : result['url']
                         }

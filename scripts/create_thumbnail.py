@@ -29,7 +29,7 @@ class CreateThumbnail:
                 " AND A.thread_id IS NULL "
                 " LIMIT 5000",
                 {
-                    'thread_id': thread_id
+                    'thread_id': thread_id,
                 }
             )
             db.commit()
@@ -37,7 +37,14 @@ class CreateThumbnail:
             # 予約したレコードを取得する。
             # サムネイル作成キューから、自プロセス番号のレコードを取得する。
             results = db.execute(
-                " SELECT A.tweet_id, A.url, B.`type`, B.file_name, B.directory_path, D.disp_name"
+                " SELECT A.service_user_id"
+                "       ,A.user_id"
+                "       ,A.tweet_id"
+                "       ,A.url"
+                "       ,B.`type`"
+                "       ,B.file_name"
+                "       ,B.directory_path"
+                "       ,D.disp_name"
                 " FROM queue_create_thumbs A"
                 " INNER JOIN tweet_medias B"
                 " ON A.tweet_id = B.tweet_id"
@@ -49,7 +56,7 @@ class CreateThumbnail:
                 " WHERE A.thread_id = %(thread_id)s"
                 " AND A.`status` = 0",
                 {
-                    'thread_id': thread_id
+                    'thread_id': thread_id,
                 }
             )
 
@@ -60,9 +67,9 @@ class CreateThumbnail:
 
                     # サムネイルファイル名を発行する
                     log.info(" -> サムネイル名を発行しています...")
-                    originText = result['url']
-                    stragePath = config.STRAGE_MEDIAS_PATH + result['disp_name'] + '/'
-                    thumbName = hashlib.md5(originText.encode()).hexdigest() + ".jpg"
+                    origin_text = result['url']
+                    storage_path = config.STRAGE_MEDIAS_PATH + result['service_user_id'] + '_' + result['disp_name'] + '/'
+                    thumb_name = hashlib.md5(origin_text.encode()).hexdigest() + ".jpg"
 
                     # 画像メディアの読み込み
                     if result['type'] in ('photo', 'animated_gif'):
@@ -71,7 +78,7 @@ class CreateThumbnail:
                         original = Image.open(result['directory_path'] + result['file_name']).convert('RGB')
 
                     # 動画メディアの読み込み
-                    elif result['type'] in ('video'):
+                    elif result['type'] in 'video':
                         log.info("動画サムネイルを作成しています[" + result['directory_path'] + result['file_name'] + "]...")
                         log.info(" -> 動画を読み込みます...")
                         video = cv2.VideoCapture(result['directory_path'] + result['file_name'])
@@ -82,11 +89,11 @@ class CreateThumbnail:
                         log.info(" -> フレームを切り出して保存しています...")
                         video.set(cv2.CAP_PROP_POS_FRAMES, 30)
                         ret, frame = video.read()
-                        cv2.imwrite(stragePath + thumbName, frame)
+                        cv2.imwrite(storage_path + thumb_name, frame)
 
                         # 保存した画像を読み込む
                         log.info(" -> 保存したフレームを読み込みます...")
-                        original = Image.open(stragePath + thumbName).convert('RGB')
+                        original = Image.open(storage_path + thumb_name).convert('RGB')
 
                     # 長辺は縦・横のどちらか？
                     #  -> 縦の場合は、横360pxになるように縮小する
@@ -112,40 +119,52 @@ class CreateThumbnail:
 
                     # サムネイルを保存する
                     log.info(" -> サムネイルを保存しています...")
-                    thumb.save(stragePath + thumbName, quality=80)
-                    log.info(" -> サムネイルを保存しました。[" + stragePath + thumbName + "]")
+                    thumb.save(storage_path + thumb_name, quality=80)
+                    log.info(" -> サムネイルを保存しました。[" + storage_path + thumb_name + "]")
 
                     # データベースにサムネイル情報を登録し、キューからレコードを削除する
                     log.info(" -> データベースにサムネイル情報を登録しています...")
                     db.execute(
                         " UPDATE tweet_medias"
                         " SET thumb_file_name = %(thumb_name)s"
-                        " ,thumb_directory_path = %(strage_path)s"
+                        " ,thumb_directory_path = %(storage_path)s"
                         " ,update_datetime = NOW()"
-                        " WHERE tweet_id = %(tweet_id)s"
+                        " WHERE service_user_id = %(service_user_id)s"
+                        " AND user_id = %(user_id)s"
+                        " AND tweet_id = %(tweet_id)s"
                         " AND url = %(url)s",
                         {
-                            'thumb_name': thumbName,
-                            'strage_path': stragePath,
+                            'thumb_name': thumb_name,
+                            'storage_path': storage_path,
+                            'service_user_id': result['service_user_id'],
+                            'user_id': result['user_id'],
                             'tweet_id': result['tweet_id'],
-                            'url': result['url']
+                            'url': result['url'],
                         }
                     )
                     db.execute(
                         " UPDATE tweets"
                         " SET media_ready = 1"
-                        " WHERE tweet_id = %(tweet_id)s",
+                        " WHERE service_user_id = %(service_user_id)s"
+                        " AND user_id = %(user_id)s"
+                        " AND tweet_id = %(tweet_id)s",
                         {
-                            'tweet_id': result['tweet_id']
+                            'service_user_id': result['service_user_id'],
+                            'user_id': result['user_id'],
+                            'tweet_id': result['tweet_id'],
                         }
                     )
                     db.execute(
                         " DELETE FROM queue_create_thumbs A"
-                        " WHERE A.tweet_id = %(tweet_id)s"
+                        " WHERE A.service_user_id = %(service_user_id)s"
+                        " AND A.user_id = %(user_id)s"
+                        " AND A.tweet_id = %(tweet_id)s"
                         " AND A.url = %(url)s",
                         {
+                            'service_user_id': result['service_user_id'],
+                            'user_id': result['user_id'],
                             'tweet_id': result['tweet_id'],
-                            'url': result['url']
+                            'url': result['url'],
                         }
                     )
                     db.commit()
@@ -158,10 +177,14 @@ class CreateThumbnail:
                         " UPDATE queue_create_thumbs A"
                         " SET A.`status` = 9"
                         "    ,A.error_text = %(error_text)s"
-                        " WHERE A.tweet_id = %(tweet_id)s"
+                        " WHERE A.service_user_id = %(service_user_id)s"
+                        " AND A.user_id = %(user_id)s"
+                        " AND A.tweet_id = %(tweet_id)s"
                         " AND A.url = %(url)s",
                         {
                             'error_text': str(e),
+                            'service_user_id': result['service_user_id'],
+                            'user_id': result['user_id'],
                             'tweet_id': result['tweet_id'],
                             'url': result['url']
                         }
