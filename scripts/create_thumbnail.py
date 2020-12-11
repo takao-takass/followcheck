@@ -29,7 +29,7 @@ class CreateThumbnail:
                 " AND A.thread_id IS NULL "
                 " LIMIT 5000",
                 {
-                    'thread_id': thread_id
+                    'thread_id': thread_id,
                 }
             )
             db.commit()
@@ -37,7 +37,14 @@ class CreateThumbnail:
             # 予約したレコードを取得する。
             # サムネイル作成キューから、自プロセス番号のレコードを取得する。
             results = db.execute(
-                " SELECT A.service_user_id,A.user_id,A.tweet_id, A.url, B.`type`, B.file_name, B.directory_path, D.disp_name"
+                " SELECT A.service_user_id"
+                "       ,A.user_id"
+                "       ,A.tweet_id"
+                "       ,A.url"
+                "       ,B.`type`"
+                "       ,B.file_name"
+                "       ,B.directory_path"
+                "       ,D.disp_name"
                 " FROM queue_create_thumbs A"
                 " INNER JOIN tweet_medias B"
                 " ON A.tweet_id = B.tweet_id"
@@ -49,7 +56,7 @@ class CreateThumbnail:
                 " WHERE A.thread_id = %(thread_id)s"
                 " AND A.`status` = 0",
                 {
-                    'thread_id': thread_id
+                    'thread_id': thread_id,
                 }
             )
 
@@ -129,18 +136,22 @@ class CreateThumbnail:
                         {
                             'thumb_name': thumb_name,
                             'storage_path': storage_path,
-                            'service_user_id' : result['service_user_id'],
-                            'user_id' : result['user_id'],
+                            'service_user_id': result['service_user_id'],
+                            'user_id': result['user_id'],
                             'tweet_id': result['tweet_id'],
-                            'url': result['url']
+                            'url': result['url'],
                         }
                     )
                     db.execute(
                         " UPDATE tweets"
                         " SET media_ready = 1"
-                        " WHERE tweet_id = %(tweet_id)s",
+                        " WHERE service_user_id = %(service_user_id)s"
+                        " AND user_id = %(user_id)s"
+                        " AND tweet_id = %(tweet_id)s",
                         {
-                            'tweet_id': result['tweet_id']
+                            'service_user_id': result['service_user_id'],
+                            'user_id': result['user_id'],
+                            'tweet_id': result['tweet_id'],
                         }
                     )
                     db.execute(
@@ -150,10 +161,10 @@ class CreateThumbnail:
                         " AND A.tweet_id = %(tweet_id)s"
                         " AND A.url = %(url)s",
                         {
-                            'service_user_id' : result['service_user_id'],
-                            'user_id' : result['user_id'],
+                            'service_user_id': result['service_user_id'],
+                            'user_id': result['user_id'],
                             'tweet_id': result['tweet_id'],
-                            'url': result['url']
+                            'url': result['url'],
                         }
                     )
                     db.commit()
