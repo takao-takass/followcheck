@@ -157,7 +157,7 @@ while requests_max > 0:
                 " 	,update_datetime" 
                 " 	,deleted" 
                 " ) VALUES (" 
-                " 	,'"+tweet['service_user_id']+"'" 
+                " 	 '"+tweet['service_user_id']+"'" 
                 " 	,'"+tweet['user_id']+"'" 
                 " 	,'"+tweet['tweet_id']+"'" 
                 " 	,'"+tweet['tweet_user_id']+"'" 
