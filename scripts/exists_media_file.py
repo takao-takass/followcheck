@@ -42,7 +42,8 @@ class ExistsMediaFile:
                 " ON tm.service_user_id = lt.service_user_id"
                 " AND tm.user_id = lt.user_id"
                 " AND tm.tweet_id = lt.tweet_id"
-                " AND tm.url = lt.url",
+                " AND tm.url = lt.url"
+                " WHERE lt.service_user_id IS NULL",
                 {
                 }
             )
