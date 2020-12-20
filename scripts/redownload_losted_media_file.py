@@ -26,7 +26,7 @@ class RedownloadLostedMediaFile:
                 }
             )
 
-            log.info(f"ダウンロードキューに登録します： {len(checked_tweet_medias)}件")
+            log.info(f"ダウンロードキューに登録します。")
             for checked_tweet_media in checked_tweet_medias:
 
                 try:

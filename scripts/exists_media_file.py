@@ -54,8 +54,7 @@ class ExistsMediaFile:
 
                     # ファイルのチェック
                     is_lost = False
-                    thumb_file_path = checked_tweet_media['thumb_directory_path'] + checked_tweet_media[
-                        'thumb_file_name']
+                    thumb_file_path = checked_tweet_media['thumb_directory_path'] + checked_tweet_media['thumb_file_name']
                     media_file_path = checked_tweet_media['directory_path'] + checked_tweet_media['file_name']
                     log.info(media_file_path)
                     if not os.path.isfile(thumb_file_path):
