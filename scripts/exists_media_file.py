@@ -48,23 +48,22 @@ class ExistsMediaFile:
                 }
             )
 
-            # サムネイルの作成
             for checked_tweet_media in checked_tweet_medias:
 
                 try:
 
                     # ファイルのチェック
-                    is_losted = False
+                    is_lost = False
                     thumb_file_path = checked_tweet_media['thumb_directory_path'] + checked_tweet_media[
                         'thumb_file_name']
                     media_file_path = checked_tweet_media['directory_path'] + checked_tweet_media['file_name']
                     log.info(media_file_path)
                     if not os.path.isfile(thumb_file_path):
-                        is_losted = True
+                        is_lost = True
                     elif not os.path.isfile(media_file_path):
-                        is_losted = True
+                        is_lost = True
 
-                    if is_losted:
+                    if is_lost:
                         log.info("･･･存在しませんでした。")
                         db.execute(
                             " INSERT INTO losted_tweet_medias ("
@@ -99,8 +98,12 @@ class ExistsMediaFile:
                             "     ,%(create_datetime)s"
                             "     ,%(update_datetime)s"
                             "     ,%(deleted)s"
-                            " );",
-                            {
+                            " )"
+                            " ON DUPLICATE KEY UPDATE"
+                            "     losted_datetime = NOW()"
+                            "     download_entried = 0"
+                            " ;"
+                            , {
                                 'service_user_id': checked_tweet_media['service_user_id'],
                                 'user_id': checked_tweet_media['user_id'],
                                 'tweet_id': checked_tweet_media['tweet_id'],

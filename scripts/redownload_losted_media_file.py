@@ -1,9 +1,8 @@
-import os
 import sys
 from classes import logger, thread, databeses, exceptions
 
 
-class ExistsMediaFile:
+class RedownloadLostedMediaFile:
 
     @staticmethod
     def run():
@@ -20,17 +19,42 @@ class ExistsMediaFile:
                 "     ,user_id"
                 "     ,tweet_id"
                 "     ,url"
-                " FROM losted_tweet_medias",
-                {
+                " FROM losted_tweet_medias"
+                " WHERE download_entried = 0"
+                " ;"
+                , {
                 }
             )
 
+            log.info(f"ダウンロードキューに登録します： {len(checked_tweet_medias)}件")
+            for checked_tweet_media in checked_tweet_medias:
 
+                try:
 
+                    db.execute(
+                        " INSERT INTO queue_download_medias ("
+                        "      service_user_id"
+                        "     ,user_id"
+                        "     ,tweet_id"
+                        "     ,url"
+                        " ) VALUES ("
+                        "      %(service_user_id)s"
+                        "     ,%(user_id)s"
+                        "     ,%(tweet_id)s"
+                        "     ,%(url)s"
+                        " )"
+                        " ;"
+                        , {
+                            'service_user_id': checked_tweet_media['service_user_id'],
+                            'user_id': checked_tweet_media['user_id'],
+                            'tweet_id': checked_tweet_media['tweet_id'],
+                            'url': checked_tweet_media['url'],
+                        }
+                    )
+                    db.commit()
 
-
-
-
+                except Exception as e:
+                    log.error(e)
 
 
         except exceptions.UncreatedThreadException:
@@ -47,4 +71,4 @@ class ExistsMediaFile:
 
 
 # 処理実行
-ExistsMediaFile.run()
+RedownloadLostedMediaFile.run()
