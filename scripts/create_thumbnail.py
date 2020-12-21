@@ -1,3 +1,4 @@
+import os
 import sys, hashlib, config, cv2
 from PIL import Image
 from classes import logger, thread, databeses, exceptions
@@ -116,6 +117,10 @@ class CreateThumbnail:
                     #  -> サイズは360×260
                     log.info(" -> 画像をトリミングしています...")
                     thumb = original.crop((0, 0, 360, 260))
+
+                    # ディレクトリパス（無ければ作る）
+                    if not os.path.exists(storage_path):
+                        os.mkdir(storage_path)
 
                     # サムネイルを保存する
                     log.info(" -> サムネイルを保存しています...")
