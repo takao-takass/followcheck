@@ -56,6 +56,22 @@ class RedownloadLostedMediaFile:
                 except Exception as e:
                     log.error(e)
 
+                finally:
+                    db.execute(
+                        " UPDATE losted_tweet_medias"
+                        " SET download_entried = 1"
+                        " WHERE service_user_id = %(service_user_id)s"
+                        " AND user_id = %(user_id)s"
+                        " AND tweet_id = %(tweet_id)s"
+                        " AND url = %(url)s"
+                        , {
+                            'service_user_id': checked_tweet_media['service_user_id'],
+                            'user_id': checked_tweet_media['user_id'],
+                            'tweet_id': checked_tweet_media['tweet_id'],
+                            'url': checked_tweet_media['url'],
+                        }
+                    )
+                    db.commit()
 
         except exceptions.UncreatedThreadException:
             sys.exit()
