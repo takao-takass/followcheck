@@ -29,8 +29,8 @@ class DownloadMedias:
                 " SET thread_id = %(thread_id)s"
                 " WHERE `status` = 0"
                 " AND thread_id IS NULL "
-                " LIMIT 5000",
-                {
+                " LIMIT 5000"
+                , {
                     'thread_id': thread_id
                 }
             )
@@ -46,8 +46,8 @@ class DownloadMedias:
                 " ON tm.tweet_id = tw.tweet_id"
                 " INNER JOIN relational_users ru"
                 " ON tw.user_id = ru.user_id"
-                " WHERE qdm.thread_id = %(thread_id)s",
-                {
+                " WHERE qdm.thread_id = %(thread_id)s"
+                , {
                     'thread_id': thread_id
                 }
             )
@@ -85,8 +85,8 @@ class DownloadMedias:
                         " WHERE service_user_id = %(service_user_id)s"
                         " AND user_id = %(user_id)s"
                         " AND tweet_id = %(tweet_id)s"
-                        " AND url = %(url)s",
-                        {
+                        " AND url = %(url)s"
+                        , {
                             'file_name': file_name,
                             'directory_path': directory_path,
                             'service_user_id': download_media['service_user_id'],
@@ -96,9 +96,22 @@ class DownloadMedias:
                         }
                     )
                     db.execute(
-                        " INSERT INTO queue_create_thumbs (service_user_id, user_id, tweet_id, url)"
-                        " VALUES ( %(service_user_id)s, %(user_id)s, %(tweet_id)s, %(url)s)",
-                        {
+                        " INSERT INTO queue_create_thumbs ("
+                        "     service_user_id"
+                        "    ,user_id"
+                        "    ,tweet_id"
+                        "    ,url"
+                        " ) VALUES ("
+                        "     %(service_user_id)s"
+                        "    ,%(user_id)s"
+                        "    ,%(tweet_id)s"
+                        "    ,%(url)s"
+                        " )"
+                        " ON DUPLICATE KEY UPDATE"
+                        "     status = 0"
+                        "     thread_id = NULL"
+                        "     error_text = NULL"
+                        , {
                             'service_user_id': download_media['service_user_id'],
                             'user_id': download_media['user_id'],
                             'tweet_id': download_media['tweet_id'],
@@ -107,8 +120,8 @@ class DownloadMedias:
                     )
                     db.execute(
                         " INSERT INTO queue_compress_medias (service_user_id, user_id, tweet_id, url)"
-                        " VALUES ( %(service_user_id)s, %(user_id)s, %(tweet_id)s, %(url)s)",
-                        {
+                        " VALUES ( %(service_user_id)s, %(user_id)s, %(tweet_id)s, %(url)s)"
+                        , {
                             'service_user_id': download_media['service_user_id'],
                             'user_id': download_media['user_id'],
                             'tweet_id': download_media['tweet_id'],
@@ -120,8 +133,8 @@ class DownloadMedias:
                         " WHERE A.service_user_id = %(service_user_id)s"
                         " AND A.user_id = %(user_id)s"
                         " AND A.tweet_id = %(tweet_id)s"
-                        " AND A.url = %(url)s",
-                        {
+                        " AND A.url = %(url)s"
+                        , {
                             'service_user_id': download_media['service_user_id'],
                             'user_id': download_media['user_id'],
                             'tweet_id': download_media['tweet_id'],
@@ -140,8 +153,8 @@ class DownloadMedias:
                         " WHERE A.service_user_id = %(service_user_id)s"
                         " AND A.user_id = %(user_id)s"
                         " AND A.tweet_id = %(tweet_id)s"
-                        " AND A.url = %(url)s",
-                        {
+                        " AND A.url = %(url)s"
+                        , {
                             'error_text': str(e),
                             'service_user_id': download_media['service_user_id'],
                             'user_id': download_media['user_id'],
