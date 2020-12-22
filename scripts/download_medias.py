@@ -108,9 +108,9 @@ class DownloadMedias:
                         "    ,%(url)s"
                         " )"
                         " ON DUPLICATE KEY UPDATE"
-                        "     status = 0"
-                        "     thread_id = NULL"
-                        "     error_text = NULL"
+                        "      status = 0"
+                        "     ,thread_id = NULL"
+                        "     ,error_text = NULL"
                         , {
                             'service_user_id': download_media['service_user_id'],
                             'user_id': download_media['user_id'],
