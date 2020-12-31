@@ -43,7 +43,7 @@ class RepairUsers:
                 if res.status_code != 200:
                     log.warn(f"APIのリクエストが異常値を返しました [res.status_code={res.status_code}]")
 
-                if not hasattr(attr_test, 'id_str'):
+                if not hasattr(res, 'id_str'):
                     log.warn(f"Twitterに存在しないか削除されたユーザです")
 
                 db.execute(
