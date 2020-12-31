@@ -36,7 +36,7 @@ class RepairUsers:
 
                 log.info(f"ユーザ情報を復旧します [user_id={repair_user_id['user_id']}]")
 
-                res = twitter.get("https://api.twitter.com/1.1/statuses/user_timeline.json", params={
+                res = twitter.get("https://api.twitter.com/1.1/users/show.json", params={
                     "user_id": repair_user_id['user_id']
                 })
 
