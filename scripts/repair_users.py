@@ -15,6 +15,13 @@ class RepairUsers:
             thread_id = thread.ThreadId().CreateThread('repair_users.py', 1)
             log = logger.ThreadLogging(thread_id)
 
+            twitter = OAuth1Session(
+                config.CONSUMER_KEY,
+                config.CONSUMER_SECRET,
+                config.ACCESS_TOKEN,
+                config.ACCESS_TOKEN_SECRET
+            )
+
             db = databeses.DbConnection(log)
             repair_user_ids = db.execute(
                 " SELECT user_id"
@@ -28,6 +35,7 @@ class RepairUsers:
             for repair_user_id in repair_user_ids:
 
                 log.info(f"ユーザ情報を復旧します [user_id={repair_user_id}]")
+
                 res = twitter.get("https://api.twitter.com/1.1/statuses/user_timeline.json", params={
                     "user_id": repair_user_id
                 })
