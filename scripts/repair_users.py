@@ -46,6 +46,7 @@ class RepairUsers:
 
                 if not hasattr(res, 'id_str'):
                     log.warn(f"Twitterに存在しないか削除されたユーザです")
+                    log.debug(res)
                     continue
 
                 db.execute(
