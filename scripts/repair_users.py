@@ -34,10 +34,10 @@ class RepairUsers:
 
             for repair_user_id in repair_user_ids:
 
-                log.info(f"ユーザ情報を復旧します [user_id={repair_user_id}]")
+                log.info(f"ユーザ情報を復旧します [user_id={repair_user_id['user_id']}]")
 
                 res = twitter.get("https://api.twitter.com/1.1/statuses/user_timeline.json", params={
-                    "user_id": repair_user_id
+                    "user_id": repair_user_id['user_id']
                 })
 
                 if res.status_code != 200:
@@ -46,7 +46,6 @@ class RepairUsers:
 
                 if not hasattr(res, 'id_str'):
                     log.warn(f"Twitterに存在しないか削除されたユーザです")
-                    log.debug(res)
                     continue
 
                 db.execute(
