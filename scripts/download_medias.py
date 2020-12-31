@@ -64,17 +64,19 @@ class DownloadMedias:
                     os.mkdir(directory_path)
 
                 # 画像ファイルの対応サイズを判定
-                size = "thumb"
+                size = ""
                 if "large" in download_media['sizes']:
-                    size = "large"
+                    size = ":large"
                 elif "medium" in download_media['sizes']:
-                    size = "medium"
+                    size = ":medium"
                 elif "small" in download_media['sizes']:
-                    size = "small"
+                    size = ":small"
+                elif "thumb" in download_media['sizes']:
+                    size = ":thumb"
 
                 try:
                     print("ダウンロード中...  " + download_media['url'])
-                    data = urllib.request.urlopen(download_media['url'] + ":" + size, timeout=10).read()
+                    data = urllib.request.urlopen(download_media['url'] + size, timeout=20).read()
                     with open(directory_path + file_name, mode="wb") as f:
                         f.write(data)
 
