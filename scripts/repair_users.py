@@ -1,6 +1,6 @@
-import os
 import sys
 import config
+import json
 from classes import logger, thread, databeses, exceptions
 from requests_oauthlib import OAuth1Session
 
@@ -44,15 +44,16 @@ class RepairUsers:
                     log.warn(f"APIのリクエストが異常値を返しました [res.status_code={res.status_code}]")
                     continue
 
-                if not hasattr(res, 'id_str'):
+                parsed_res = json.loads(res.text)
+                if 'id' not in parsed_res.keys():
                     log.warn(f"Twitterに存在しないか削除されたユーザです")
                     continue
 
                 db.execute(
-                    " DELETE FROM relational_users ("
+                    " DELETE FROM relational_users"
                     " WHERE user_id = %(user_id)s"
                     , {
-                        'user_id': res.id_str,
+                        'user_id': parsed_res['id_str'],
                     }
                 )
 
@@ -77,13 +78,13 @@ class RepairUsers:
                     "     ,0"
                     "     ,0"
                     "     ,NOW()"
-                    "     ,'2000-01-01'"
+                    "     ,'1990-01-01'"
                     "     ,0"
                     " )"
                     , {
-                        'user_id': res.id_str,
-                        'disp_name': res.screen_name,
-                        'name': res.name,
+                        'user_id': parsed_res['id_str'],
+                        'disp_name': parsed_res['screen_name'],
+                        'name': parsed_res['name'],
                     }
                 )
 
