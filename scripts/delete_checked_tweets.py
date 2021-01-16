@@ -20,31 +20,34 @@ class DeleteCheckedTweets:
 
             # 削除対象のツイートIDを取得する
             log.info('削除対象のツイートIDを取得しています。')
-            target_tweet_ids = db.execute(
-                " SELECT service_user_id ,tweet_id"
-                " FROM checked_tweets ct"
-                " WHERE ct.update_datetime <= DATE_SUB(NOW(),INTERVAL 3 DAY)"
+            delete_tweets = db.execute(
+                " SELECT service_user_id, user_id, tweet_id"
+                " FROM delete_tweets ct"
+                " WHERE ct.update_datetime <= DATE_SUB(NOW(),INTERVAL 1 DAY)"
                 " AND NOT EXISTS ("
                 "     SELECT 1"
                 "     FROM keep_tweets kt"
                 "     WHERE kt.service_user_id = ct.service_user_id"
                 "     AND kt.tweet_id = ct.tweet_id"
                 " )"
-                " LIMIT 1000",
-                {}
+                " LIMIT 5000"
+                , {}
             )
 
-            for target_tweet_id in target_tweet_ids:
+            for delete_tweet in delete_tweets:
 
                 # メディアの削除
-                log.info('ツイートを削除します。 tweet_id：'+target_tweet_id['tweet_id'])
-                log.info('メディアのファイルパスを取得しています。')
+                log.info('ツイートを削除します。 tweet_id：'+delete_tweet['tweet_id'])
                 tweet_medias = db.execute(
                     " SELECT file_name, directory_path, thumb_file_name, thumb_directory_path"
                     " FROM tweet_medias tm"
-                    " WHERE tm.tweet_id = %(tweet_id)s",
-                    {
-                        'tweet_id': target_tweet_id['tweet_id']
+                    " WHERE tm.service_user_id = %(service_user_id)s"
+                    " AND tm.user_id = %(user_id)s"
+                    " AND tm.tweet_id = %(tweet_id)s"
+                    , {
+                        'service_user_id': delete_tweet['service_user_id'],
+                        'user_id': delete_tweet['user_id'],
+                        'tweet_id': delete_tweet['tweet_id'],
                     }
                 )
 
@@ -67,38 +70,41 @@ class DeleteCheckedTweets:
                             log.info('削除しました。：'+thumb_file_path)
 
                 # tweet_mediasの削除
-                log.info('tweet_mediasから削除しています。')
                 db.execute(
-                    " DELETE FROM tweet_medias A"
-                    " WHERE A.tweet_id = %(tweet_id)s",
-                    {
-                        'tweet_id': target_tweet_id['tweet_id']
+                    " DELETE FROM tweet_medias tm"
+                    " WHERE tm.service_user_id = %(service_user_id)s"
+                    " AND tm.user_id = %(user_id)s"
+                    " AND tm.tweet_id = %(tweet_id)s"
+                    , {
+                        'service_user_id': delete_tweet['service_user_id'],
+                        'user_id': delete_tweet['user_id'],
+                        'tweet_id': delete_tweet['tweet_id'],
                     }
                 )
-                db.commit()
 
                 # tweetsの削除
-                log.info('tweetsから削除しています。')
                 db.execute(
-                    " DELETE FROM tweets A"
-                    " WHERE A.service_user_id = %(service_user_id)s"
-                    " AND A.tweet_id = %(tweet_id)s",
-                    {
-                        'service_user_id': target_tweet_id['service_user_id'],
-                        'tweet_id': target_tweet_id['tweet_id']
+                    " DELETE FROM tweets t"
+                    " WHERE t.service_user_id = %(service_user_id)s"
+                    " AND t.user_id = %(user_id)s"
+                    " AND t.tweet_id = %(tweet_id)s"
+                    , {
+                        'service_user_id': delete_tweet['service_user_id'],
+                        'user_id': delete_tweet['user_id'],
+                        'tweet_id': delete_tweet['tweet_id'],
                     }
                 )
-                db.commit()
 
-                # checked_tweetsの削除
-                log.info('checked_tweetsから削除しています。')
+                # delete_tweetsの削除
                 db.execute(
-                    " DELETE FROM checked_tweets A"
+                    " DELETE FROM delete_tweets A"
                     " WHERE A.service_user_id = %(service_user_id)s"
-                    " AND A.tweet_id = %(tweet_id)s",
-                    {
-                        'service_user_id': target_tweet_id['service_user_id'],
-                        'tweet_id': target_tweet_id['tweet_id']
+                    " AND A.user_id = %(user_id)s"
+                    " AND A.tweet_id = %(tweet_id)s"
+                    , {
+                        'service_user_id': delete_tweet['service_user_id'],
+                        'user_id': delete_tweet['user_id'],
+                        'tweet_id': delete_tweet['tweet_id'],
                     }
                 )
                 db.commit()
