@@ -66,7 +66,7 @@ while requests_max > 0:
             'screen_name':dispName,
             'count':200,
             'since_id':continueTweetId,
-            'include_rts':(False if include_retweet==0 else True)
+            'include_rts':False
         })
         statuses = json.loads(res.text)
 
