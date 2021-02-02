@@ -34,7 +34,8 @@ while requests_max > 0:
             " INNER JOIN relational_users B " 
             " ON A.user_id = B.user_id " 
             " WHERE A.status IN ('5','6') "
-            " AND B.icecream = 0" 
+            " AND B.icecream = 0"
+            " AND A.not_tweeted_longtime = 0"
             " ORDER BY A.status desc LIMIT 1 "
         )
 
