@@ -305,6 +305,7 @@ try:
         " ON A.user_id = B.user_id "
         " WHERE A.status NOT IN ('0','1','9','D') "
         " AND B.icecream = 0 "
+        " AND A.not_tweeted_longtime = 0 "
         " ORDER BY A.status desc LIMIT 1 "
     )
     if cursor.rowcount == 0:
