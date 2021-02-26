@@ -34,7 +34,8 @@ while requests_max > 0:
             " INNER JOIN relational_users B " 
             " ON A.user_id = B.user_id " 
             " WHERE A.status IN ('5','6') "
-            " AND B.icecream = 0" 
+            " AND B.icecream = 0"
+            " AND A.not_tweeted_longtime = 0"
             " ORDER BY A.status desc LIMIT 1 "
         )
 
@@ -66,7 +67,7 @@ while requests_max > 0:
             'screen_name':dispName,
             'count':200,
             'since_id':continueTweetId,
-            'include_rts':(False if include_retweet==0 else True)
+            'include_rts':False
         })
         statuses = json.loads(res.text)
 
@@ -304,6 +305,7 @@ try:
         " ON A.user_id = B.user_id "
         " WHERE A.status NOT IN ('0','1','9','D') "
         " AND B.icecream = 0 "
+        " AND A.not_tweeted_longtime = 0 "
         " ORDER BY A.status desc LIMIT 1 "
     )
     if cursor.rowcount == 0:

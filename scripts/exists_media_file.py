@@ -34,9 +34,10 @@ class ExistsMediaFile:
                 "       ,tm.create_datetime"
                 "       ,tm.update_datetime"
                 "       ,tm.deleted"
-                " FROM checked_tweets t"
+                " FROM delete_tweets t"
                 " INNER JOIN tweet_medias tm"
                 " ON t.service_user_id = tm.service_user_id"
+                " AND t.user_id = tm.user_id"
                 " AND t.tweet_id = tm.tweet_id"
                 " LEFT JOIN losted_tweet_medias lt"
                 " ON tm.service_user_id = lt.service_user_id"
@@ -100,7 +101,7 @@ class ExistsMediaFile:
                             " )"
                             " ON DUPLICATE KEY UPDATE"
                             "     losted_datetime = NOW()"
-                            "     download_entried = 0"
+                            "    ,download_entried = 0"
                             " ;"
                             , {
                                 'service_user_id': checked_tweet_media['service_user_id'],
