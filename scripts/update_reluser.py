@@ -36,8 +36,9 @@ try:
         " FROM relational_users RU "\
         " WHERE RU.deleted = 0"\
         " AND RU.icecream = 0" \
+        " AND RU.not_found = 0" \
         " ORDER BY RU.update_datetime asc" \
-        " LIMIT 9999"
+        " LIMIT 100"
     )
     for row in cursor:
         relationalUserIdList.append(row['user_id'])
@@ -56,28 +57,23 @@ print('関連ユーザの情報を取得しています... ['+str(len(relational
 # ユーザ取得APIのリクエストパラメータを作成する
 # -> ユーザIDはまとめて100件リクエストできる
 requestUserStrList = []
-userStrList = []
-count = 0
 for userId in relationalUserIdList:
-    userStrList.append(userId)
-    count = count + 1
-    if count >= 100 or count >= len(relationalUserIdList)%100 :
-        requestUserStrList.append(userStrList)
-        userStrList = []
-        count = 0
+    requestUserStrList.append(userId)
 
 # ユーザ100件ごとにユーザ情報を取得する
 relationalUesrList = []
+notfoundUesrList = []
 for userStr in requestUserStrList:
 
     # APIリクエスト
     params = {
-        'user_id':",".join(userStr)
+        'user_id':userStr
     }
-    lookupRes = twitter.get("https://api.twitter.com/1.1/users/lookup.json", params = params)
+    lookupRes = twitter.get("https://api.twitter.com/1.1/users/lookup.json", params = userStr)
 
     # APIレスポンスのからユーザ情報リストを取得
     if lookupRes.status_code == 200:
+        print("Succeed: " + str(lookupRes.status_code))
         lookup = json.loads(lookupRes.text)
         for user in lookup:
             relationalUesrList.append(
@@ -92,6 +88,9 @@ for userStr in requestUserStrList:
                     user['friends_count']
                 )
             )
+    elif lookupRes.status_code == 404:
+        notfoundUesrList.append(userStr)
+        print("Failed: " + str(lookupRes.status_code) +" - "+lookupRes.text)
     else:
         print("Failed: " + str(lookupRes.status_code) +" - "+lookupRes.text)
  
@@ -114,7 +113,6 @@ cursor = con.cursor()
 
 try:
     for user in relationalUesrList:
-
         try:
             # 関連ユーザテーブルを更新する
             print('関連ユーザテーブルを更新しています...['+user.screen_name+'、id='+user.id_str+']')
@@ -144,13 +142,30 @@ try:
                     "       ,'"+profile_icon_url+"' "\
                     "   FROM DUAL "
                 cursor.execute(sql)
+            con.commit()
 
         except Exception as ex:
             print("ERROR: ",ex)
             print(sql)
             print("エラーが発生しましたが、処理を続行します。")
-    
-    con.commit()
+
+    for user in notfoundUesrList:
+        try:
+            # 関連ユーザテーブルを更新する
+            print('NOT FOUNDユーザを設定しています...['+user+']')
+            sql =\
+                " UPDATE relational_users "\
+                " SET not_found = 1"\
+                " ,update_datetime = NOW()"\
+                " WHERE user_id = '"+user+"'"
+            cursor.execute(sql)
+            con.commit()
+
+        except Exception as ex:
+            print("ERROR: ",ex)
+            print(sql)
+            print("エラーが発生しましたが、処理を続行します。")
+
 
 except Exception as e:
     con.rollback()
