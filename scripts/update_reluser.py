@@ -154,7 +154,7 @@ try:
             sql = " UPDATE relational_users "\
                 " SET not_found = 1"\
                 " ,RU.update_datetime = NOW()"\
-                " WHERE RU.user_id = '"+user+"'"
+                " WHERE user_id = '"+user+"'"
             cursor.execute(sql)
             con.commit()
 
