@@ -73,6 +73,7 @@ for userStr in requestUserStrList:
 
     # APIレスポンスのからユーザ情報リストを取得
     if lookupRes.status_code == 200:
+        print("Succeed: " + str(lookupRes.status_code))
         lookup = json.loads(lookupRes.text)
         for user in lookup:
             relationalUesrList.append(
@@ -89,6 +90,7 @@ for userStr in requestUserStrList:
             )
     elif lookupRes.status_code == 404:
         notfoundUesrList.append(userStr)
+        print("Failed: " + str(lookupRes.status_code) +" - "+lookupRes.text)
     else:
         print("Failed: " + str(lookupRes.status_code) +" - "+lookupRes.text)
  
