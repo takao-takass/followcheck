@@ -37,7 +37,7 @@ try:
         " WHERE RU.deleted = 0"\
         " AND RU.icecream = 0" \
         " ORDER BY RU.update_datetime asc" \
-        " LIMIT 9999"
+        " LIMIT 100"
     )
     for row in cursor:
         relationalUserIdList.append(row['user_id'])
@@ -57,14 +57,10 @@ print('関連ユーザの情報を取得しています... ['+str(len(relational
 # -> ユーザIDはまとめて100件リクエストできる
 requestUserStrList = []
 userStrList = []
-count = 0
 for userId in relationalUserIdList:
     userStrList.append(userId)
-    count = count + 1
-    if count >= 100 or count >= len(relationalUserIdList)%100 :
-        requestUserStrList.append(userStrList)
-        userStrList = []
-        count = 0
+    requestUserStrList.append(userStrList)
+    userStrList = []
 
 # ユーザ100件ごとにユーザ情報を取得する
 relationalUesrList = []
