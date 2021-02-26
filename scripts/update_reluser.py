@@ -153,9 +153,10 @@ try:
         try:
             # 関連ユーザテーブルを更新する
             print('NOT FOUNDユーザを設定しています...['+user+']')
-            sql = " UPDATE relational_users "\
+            sql =\
+                " UPDATE relational_users "\
                 " SET not_found = 1"\
-                " ,RU.update_datetime = NOW()"\
+                " ,update_datetime = NOW()"\
                 " WHERE user_id = '"+user+"'"
             cursor.execute(sql)
             con.commit()
