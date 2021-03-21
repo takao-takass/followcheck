@@ -26,6 +26,26 @@ class DbConnection:
             raise e
         return self.cursor
 
+    def fetch(self, sql, param):
+
+        self.logging.info(f'SQL="{sql}" param={str(param)}')
+        try:
+            self.cursor.execute(sql, param)
+        except Exception as e:
+            self.logging.error(e)
+            raise e
+        return self.cursor.fetchall()
+
+    def first(self, sql, param):
+
+        self.logging.info(f'SQL="{sql}" param={str(param)}')
+        try:
+            self.cursor.execute(sql, param)
+        except Exception as e:
+            self.logging.error(e)
+            raise e
+        return self.cursor.fetchone()
+
     def commit(self):
         self.con.commit()
         self.logging.info('コミットしました。')
