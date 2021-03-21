@@ -4,6 +4,7 @@ import os
 from classes import logger, thread, databeses, exceptions
 
 
+# リツイートされたツイートをDBから削除する
 class DeleteCheckedTweets:
 
     @staticmethod
