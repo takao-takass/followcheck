@@ -17,7 +17,7 @@ class ExistingTweetMedias:
             db = databeses.DbConnection(log)
 
             existing_tweet_medias = db.fetch(
-                " SELECT tm.directory_path||tm.file_name AS file_path "
+                " SELECT CONCAT(tm.directory_path,tm.file_name) AS file_path "
                 "       ,tm.service_user_id"
                 "       ,tm.user_id"
                 "       ,tm.tweet_id"
