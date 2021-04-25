@@ -35,7 +35,7 @@ class ExistingMediaThumbs:
                 "       ,tm.deleted"
                 " FROM existing_media_thumbs tm"
                 " WHERE thumb_directory_path IS NOT NULL"
-                " LIMIT 10000"
+                " LIMIT 100000"
                 , {}
             )
 
