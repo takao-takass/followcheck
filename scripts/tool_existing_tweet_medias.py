@@ -34,7 +34,7 @@ class ExistingTweetMedias:
                 "       ,tm.update_datetime"
                 "       ,tm.deleted"
                 " FROM existing_tweet_medias tm"
-                " LIMIT 10000"
+                " LIMIT 100000"
                 , {}
             )
 
