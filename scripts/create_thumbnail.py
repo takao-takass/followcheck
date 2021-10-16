@@ -160,11 +160,11 @@ class CreateThumbnail:
                         }
                     )
                     db.execute(
-                        " DELETE FROM queue_create_thumbs A"
-                        " WHERE A.service_user_id = %(service_user_id)s"
-                        " AND A.user_id = %(user_id)s"
-                        " AND A.tweet_id = %(tweet_id)s"
-                        " AND A.url = %(url)s",
+                        " DELETE FROM queue_create_thumbs"
+                        " WHERE service_user_id = %(service_user_id)s"
+                        " AND user_id = %(user_id)s"
+                        " AND tweet_id = %(tweet_id)s"
+                        " AND url = %(url)s",
                         {
                             'service_user_id': result['service_user_id'],
                             'user_id': result['user_id'],
