@@ -29,11 +29,11 @@ class DeleteOldTweet:
             # 利用者ごとに削除対象を選択する
             for service_user_id in service_user_id_list:
                 db.execute(
-                    " UPDATE queue_delete_tweets A"\
-                    " SET A.thread_id = %(thread_id)s"\
-                    " WHERE  A.service_user_id = %(service_user_id)s "\
-                    " AND A.`status` = '0'"\
-                    " ORDER BY A.tweeted_datetime "\
+                    " UPDATE queue_delete_tweets"\
+                    " SET thread_id = %(thread_id)s"\
+                    " WHERE service_user_id = %(service_user_id)s "\
+                    " AND `status` = '0'"\
+                    " ORDER BY tweeted_datetime "\
                     " LIMIT %(max_rows)s ",
                     {
                         'thread_id':thread_id,
@@ -90,8 +90,8 @@ class DeleteOldTweet:
                 # ツイートメディアレコードを削除する
                 log.info("メディアレコードを削除しています...")
                 db.execute(
-                    " DELETE FROM tweet_medias A"\
-                    " WHERE A.tweet_id = %(tweet_id)s",
+                    " DELETE FROM tweet_medias"\
+                    " WHERE tweet_id = %(tweet_id)s",
                     {
                         'tweet_id':tweet_id['tweet_id']
                     }
@@ -100,10 +100,10 @@ class DeleteOldTweet:
                 # ツイートレコードを削除する
                 log.info("ツイートレコードを削除しています...")
                 db.execute(
-                    " DELETE FROM tweets A"\
-                    " WHERE A.service_user_id = %(service_user_id)s"\
-                    " AND A.user_id = %(user_id)s"\
-                    " AND A.tweet_id = %(tweet_id)s",
+                    " DELETE FROM tweets"\
+                    " WHERE service_user_id = %(service_user_id)s"\
+                    " AND user_id = %(user_id)s"\
+                    " AND tweet_id = %(tweet_id)s",
                     {
                         'service_user_id':tweet_id['service_user_id'],
                         'user_id':tweet_id['user_id'],
@@ -114,10 +114,10 @@ class DeleteOldTweet:
                 # キューレコードを削除する
                 log.info("キューレコードを削除しています...")
                 db.execute(
-                    " DELETE FROM queue_delete_tweets A"\
-                    " WHERE A.service_user_id = %(service_user_id)s"\
-                    " AND A.user_id = %(user_id)s"\
-                    " AND A.tweet_id = %(tweet_id)s",
+                    " DELETE FROM queue_delete_tweets"\
+                    " WHERE service_user_id = %(service_user_id)s"\
+                    " AND user_id = %(user_id)s"\
+                    " AND tweet_id = %(tweet_id)s",
                     {
                         'service_user_id':tweet_id['service_user_id'],
                         'user_id':tweet_id['user_id'],

@@ -131,11 +131,11 @@ class DownloadMedias:
                         }
                     )
                     db.execute(
-                        " DELETE FROM queue_download_medias A"
-                        " WHERE A.service_user_id = %(service_user_id)s"
-                        " AND A.user_id = %(user_id)s"
-                        " AND A.tweet_id = %(tweet_id)s"
-                        " AND A.url = %(url)s"
+                        " DELETE FROM queue_download_medias"
+                        " WHERE service_user_id = %(service_user_id)s"
+                        " AND user_id = %(user_id)s"
+                        " AND tweet_id = %(tweet_id)s"
+                        " AND url = %(url)s"
                         , {
                             'service_user_id': download_media['service_user_id'],
                             'user_id': download_media['user_id'],
@@ -149,13 +149,13 @@ class DownloadMedias:
                 except Exception as e:
                     log.error(e)
                     db.execute(
-                        " UPDATE queue_download_medias A"
-                        " SET A.`status` = 9"
-                        "    ,A.error_text = %(error_text)s"
-                        " WHERE A.service_user_id = %(service_user_id)s"
-                        " AND A.user_id = %(user_id)s"
-                        " AND A.tweet_id = %(tweet_id)s"
-                        " AND A.url = %(url)s"
+                        " UPDATE queue_download_medias"
+                        " SET `status` = 9"
+                        "    ,error_text = %(error_text)s"
+                        " WHERE service_user_id = %(service_user_id)s"
+                        " AND user_id = %(user_id)s"
+                        " AND tweet_id = %(tweet_id)s"
+                        " AND url = %(url)s"
                         , {
                             'error_text': str(e),
                             'service_user_id': download_media['service_user_id'],

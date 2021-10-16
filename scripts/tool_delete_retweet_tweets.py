@@ -62,10 +62,10 @@ class DeleteCheckedTweets:
                             log.info('ファイルを削除：'+thumb_file_path)
 
                 db.execute(
-                    " DELETE FROM tweets t"
-                    " WHERE t.service_user_id = %(service_user_id)s"
-                    " AND t.user_id = %(user_id)s"
-                    " AND t.tweet_id = %(tweet_id)s"
+                    " DELETE FROM tweets"
+                    " WHERE service_user_id = %(service_user_id)s"
+                    " AND user_id = %(user_id)s"
+                    " AND tweet_id = %(tweet_id)s"
                     , {
                         'service_user_id': delete_tweet['service_user_id'],
                         'user_id': delete_tweet['user_id'],

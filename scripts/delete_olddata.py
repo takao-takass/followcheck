@@ -23,21 +23,21 @@ try:
 
     print('蓄積した古いフォロワー情報を削除しています...')
     cursor.execute(
-        " DELETE FROM followers A " \
-        " WHERE A.exec_id IN ( " \
-        " 	SELECT EI.exec_id " \
-        " 	FROM exec_id_manage EI " \
-        " 	WHERE EI.exec_count < (SELECT MAX(exec_count) -3 FROM exec_id_manage) " \
+        " DELETE FROM followers" \
+        " WHERE exec_id IN ( " \
+        " 	SELECT exec_id " \
+        " 	FROM exec_id_manage " \
+        " 	WHERE exec_count < (SELECT MAX(exec_count) -3 FROM exec_id_manage) " \
         " ) "
     )
     
     print('蓄積した古いフォロー情報を削除しています...')
     cursor.execute(
-        " DELETE FROM friends A " \
-        " WHERE A.exec_id IN ( " \
-        " 	SELECT EI.exec_id " \
-        " 	FROM exec_id_manage EI " \
-        " 	WHERE EI.exec_count < (SELECT MAX(exec_count) -3 FROM exec_id_manage) " \
+        " DELETE FROM friends " \
+        " WHERE exec_id IN ( " \
+        " 	SELECT exec_id " \
+        " 	FROM exec_id_manage " \
+        " 	WHERE exec_count < (SELECT MAX(exec_count) -3 FROM exec_id_manage) " \
         " ) "
     )
     

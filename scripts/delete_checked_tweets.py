@@ -71,10 +71,10 @@ class DeleteCheckedTweets:
 
                 # tweet_mediasの削除
                 db.execute(
-                    " DELETE FROM tweet_medias tm"
-                    " WHERE tm.service_user_id = %(service_user_id)s"
-                    " AND tm.user_id = %(user_id)s"
-                    " AND tm.tweet_id = %(tweet_id)s"
+                    " DELETE FROM tweet_medias"
+                    " WHERE service_user_id = %(service_user_id)s"
+                    " AND user_id = %(user_id)s"
+                    " AND tweet_id = %(tweet_id)s"
                     , {
                         'service_user_id': delete_tweet['service_user_id'],
                         'user_id': delete_tweet['user_id'],
@@ -84,10 +84,10 @@ class DeleteCheckedTweets:
 
                 # tweetsの削除
                 db.execute(
-                    " DELETE FROM tweets t"
-                    " WHERE t.service_user_id = %(service_user_id)s"
-                    " AND t.user_id = %(user_id)s"
-                    " AND t.tweet_id = %(tweet_id)s"
+                    " DELETE FROM tweets"
+                    " WHERE service_user_id = %(service_user_id)s"
+                    " AND user_id = %(user_id)s"
+                    " AND tweet_id = %(tweet_id)s"
                     , {
                         'service_user_id': delete_tweet['service_user_id'],
                         'user_id': delete_tweet['user_id'],
@@ -97,10 +97,10 @@ class DeleteCheckedTweets:
 
                 # delete_tweetsの削除
                 db.execute(
-                    " DELETE FROM delete_tweets A"
-                    " WHERE A.service_user_id = %(service_user_id)s"
-                    " AND A.user_id = %(user_id)s"
-                    " AND A.tweet_id = %(tweet_id)s"
+                    " DELETE FROM delete_tweets"
+                    " WHERE service_user_id = %(service_user_id)s"
+                    " AND user_id = %(user_id)s"
+                    " AND tweet_id = %(tweet_id)s"
                     , {
                         'service_user_id': delete_tweet['service_user_id'],
                         'user_id': delete_tweet['user_id'],

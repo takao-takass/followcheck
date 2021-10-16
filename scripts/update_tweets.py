@@ -343,12 +343,12 @@ cursor = con.cursor(MySQLdb.cursors.DictCursor)
 
 # メディア有無のフラグを登録する
 cursor.execute(
-    " update tweets a" 
+    " update tweets" 
     " set is_media = 1" 
     " where EXISTS(" 
     "     select 1" 
     " from tweet_medias m" 
-    " where m.tweet_id = a.tweet_id" 
+    " where m.tweet_id = tweet_id" 
     " )" 
     " AND is_media = 0"
 )

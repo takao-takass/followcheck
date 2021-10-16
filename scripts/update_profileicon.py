@@ -57,7 +57,7 @@ try:
             print("ダウンロード中["+str(count)+"/"+str(len(downloads))+"]...  "+download['url'])
             urllib.request.urlretrieve(download['url'], directory+filename)
             cursor.execute(
-                " UPDATE profile_icons RI "\
+                " UPDATE profile_icons"\
                 " SET file_name = '"+filename+"' " \
                 " ,directory_path = '"+directory+"' " \
                 " ,completed = 1 " \
@@ -73,7 +73,7 @@ try:
         except Exception as e:
             print("ERROR: ",e)
             cursor.execute(
-                " UPDATE profile_icons RI " \
+                " UPDATE profile_icons" \
                 " SET completed = 9 " \
                 " WHERE user_id = '"+download['user_id']+"'" \
                 " AND sequence = "+str(download['sequence'])
