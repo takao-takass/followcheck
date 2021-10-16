@@ -35,7 +35,8 @@ class CompressMedia:
                 " SELECT A.service_user_id,A.user_id,A.tweet_id, A.url, B.`type`, B.file_name, B.directory_path"
                 " FROM queue_compress_medias A"
                 " INNER JOIN tweet_medias B"
-                " ON A.tweet_id = B.tweet_id"
+                " ON A.service_user_id = B.service_user_id"
+                " AND A.tweet_id = B.tweet_id"
                 " AND A.url = B.url"
                 " WHERE A.thread_id = %(thread_id)s"
                 " AND A.`status` = 0",
