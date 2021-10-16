@@ -116,15 +116,15 @@ try:
         try:
             # 関連ユーザテーブルを更新する
             print('関連ユーザテーブルを更新しています...['+user.screen_name+'、id='+user.id_str+']')
-            sql = " UPDATE relational_users RU "\
-                " SET RU.disp_name = '"+user.screen_name+"'"\
-                " ,RU.name = '"+user.name.replace("'","").replace("/","").replace("%","").replace("\\","")+"'"\
-                " ,RU.description = '"+user.description.replace("'","").replace("/","").replace("%","").replace("\\","")+"'"\
-                " ,RU.theme_color = '"+user.theme_color+"'"\
-                " ,RU.follow_count = "+str(user.friends_count)+""\
-                " ,RU.follower_count = "+str(user.followers_count)+""\
-                " ,RU.update_datetime = NOW()"\
-                " WHERE RU.user_id = '"+user.id_str+"'"
+            sql = " UPDATE relational_users"\
+                " SET disp_name = '"+user.screen_name+"'"\
+                " ,name = '"+user.name.replace("'","").replace("/","").replace("%","").replace("\\","")+"'"\
+                " ,description = '"+user.description.replace("'","").replace("/","").replace("%","").replace("\\","")+"'"\
+                " ,theme_color = '"+user.theme_color+"'"\
+                " ,follow_count = "+str(user.friends_count)+""\
+                " ,follower_count = "+str(user.followers_count)+""\
+                " ,update_datetime = NOW()"\
+                " WHERE user_id = '"+user.id_str+"'"
             cursor.execute(sql)
 
             # プロフィールアイコンテーブルを更新する

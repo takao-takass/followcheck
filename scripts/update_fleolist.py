@@ -24,12 +24,12 @@ try:
     # 相互フォローのユーザがフォロワーから居なくなった場合はリストから削除する
     print('フォロワーから居なくなったユーザをリストから削除しています...')
     cursor.execute(
-        " DELETE FROM follow_eachother UF" \
+        " DELETE FROM follow_eachother" \
         " WHERE NOT EXISTS(" \
         " 			SELECT 1" \
         " 			FROM followers FL" \
-        " 			WHERE FL.user_id = UF.user_id" \
-        " 			AND FL.follower_user_id = UF.follow_user_id" \
+        " 			WHERE FL.user_id = user_id" \
+        " 			AND FL.follower_user_id = follow_user_id" \
         " 			AND FL.exec_id = (SELECT MAX(exec_id) FROM exec_id_manage)" \
         " 	 )"
     )
@@ -37,12 +37,12 @@ try:
     # 相互フォローのユーザをフォローから外した場合はリストから削除する
     print('フォローを外したユーザをリストから削除しています...')
     cursor.execute(
-        " DELETE FROM follow_eachother UF" \
+        " DELETE FROM follow_eachother" \
         " WHERE NOT EXISTS(" \
         " 			SELECT 1" \
         " 			FROM friends FL" \
-        " 			WHERE FL.user_id = UF.user_id" \
-        " 			AND FL.follow_user_id = UF.follow_user_id" \
+        " 			WHERE FL.user_id = user_id" \
+        " 			AND FL.follow_user_id = follow_user_id" \
         " 			AND FL.exec_id = (SELECT MAX(exec_id) FROM exec_id_manage)" \
         " 	 )"
     )

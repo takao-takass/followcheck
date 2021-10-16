@@ -30,10 +30,10 @@ try:
     # 凍結・削除をされてから30日経過すると、アカウントは復活できなくなる。
     print('復活できないユーザに区分値を設定します...')
     sql = \
-        " UPDATE relational_users RU "\
-        " SET RU.icecream = 9 "\
-        " WHERE RU.icecream = 1 "\
-        " AND NOW() > DATE_ADD(RU.icecream_datetime, INTERVAL '30' DAY) "
+        " UPDATE relational_users "\
+        " SET icecream = 9 "\
+        " WHERE icecream = 1 "\
+        " AND NOW() > DATE_ADD(icecream_datetime, INTERVAL '30' DAY) "
     cursor.execute(sql)
     con.commit()
     print('区分値を設定しました。')

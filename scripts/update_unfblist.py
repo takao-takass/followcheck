@@ -24,12 +24,12 @@ try:
     # フォローされた場合はフォロバ待ちリストから削除する
     print('フォロバされたユーザをフォロバ待ちリストから削除しています...')
     cursor.execute(
-        " DELETE FROM unfollowbacked UF" \
+        " DELETE FROM unfollowbacked" \
         " WHERE EXISTS(" \
         " 			SELECT 1" \
         " 			FROM followers FL" \
-        " 			WHERE FL.user_id = UF.user_id" \
-        " 			AND FL.follower_user_id = UF.unfollowbacked_user_id" \
+        " 			WHERE FL.user_id = user_id" \
+        " 			AND FL.follower_user_id = unfollowbacked_user_id" \
         " 			AND FL.exec_id = (SELECT MAX(exec_id) FROM exec_id_manage)" \
         " 	 )"
     )
@@ -37,12 +37,12 @@ try:
     # フォローを解除した場合はフォロバ待ちリストから削除する
     print('フォロバされたユーザをフォロバ待ちリストから削除しています...')
     cursor.execute(
-        " DELETE FROM unfollowbacked UF" \
+        " DELETE FROM unfollowbacked " \
         " WHERE NOT EXISTS(" \
         " 			SELECT 1" \
         " 			FROM friends FL" \
-        " 			WHERE FL.user_id = UF.user_id" \
-        " 			AND FL.follow_user_id = UF.unfollowbacked_user_id" \
+        " 			WHERE FL.user_id = user_id" \
+        " 			AND FL.follow_user_id = unfollowbacked_user_id" \
         " 			AND FL.exec_id = (SELECT MAX(exec_id) FROM exec_id_manage)" \
         " 	 )"
     )

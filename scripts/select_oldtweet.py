@@ -42,7 +42,7 @@ class SelectOldTweet:
 
             # キューに登録されているもののうち、KEEPされたものは削除する。
             db.execute(
-                " DELETE FROM queue_delete_tweets A "\
+                " DELETE FROM queue_delete_tweets"\
                 " WHERE EXISTS ( "\
                 "     SELECT 1 "\
                 "     FROM keep_tweets B "\

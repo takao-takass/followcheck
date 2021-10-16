@@ -55,8 +55,8 @@ try:
 
     print('ユーザのメディア情報を削除しています...')
     cursor.execute(
-        " DELETE FROM tweet_medias A " \
-        " WHERE A.tweet_id IN ( " \
+        " DELETE FROM tweet_medias" \
+        " WHERE tweet_id IN ( " \
         " 	SELECT TW.tweet_id " \
         " 	FROM tweets TW " \
         "   INNER JOIN tweet_take_users TT" \
@@ -68,8 +68,8 @@ try:
     
     print('ユーザのツイート情報を削除しています...')
     cursor.execute(
-        " DELETE FROM tweets A " \
-        " WHERE (A.service_user_id,A.user_id) IN ( " \
+        " DELETE FROM tweets" \
+        " WHERE (service_user_id, user_id) IN ( " \
         " 	SELECT TT.service_user_id,TT.user_id " \
         " 	FROM tweet_take_users TT" \
         " 	WHERE TT.status = 'D' " \

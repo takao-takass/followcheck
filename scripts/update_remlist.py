@@ -24,12 +24,12 @@ try:
     # 再フォローされている場合はリムられリストから削除する
     print('再フォローされたユーザをリムられリストから削除しています...')
     cursor.execute(
-        " DELETE FROM remove_users RU" \
+        " DELETE FROM remove_users" \
         " WHERE EXISTS(" \
         " 			SELECT 1" \
         " 			FROM followers FL" \
-        " 			WHERE FL.user_id = RU.user_id" \
-        " 			AND FL.follower_user_id = RU.remove_user_id" \
+        " 			WHERE FL.user_id = user_id" \
+        " 			AND FL.follower_user_id = remove_user_id" \
         " 			AND FL.exec_id = (SELECT MAX(exec_id) FROM exec_id_manage)" \
         " 	 )"
     )
@@ -37,15 +37,15 @@ try:
     # リムられリストのフォローフラグを更新する
     print('フォローフラグを更新しています...')
     cursor.execute(
-        " UPDATE remove_users RU" \
-        " SET RU.followed = (" \
+        " UPDATE remove_users" \
+        " SET followed = (" \
         " 			SELECT COUNT(*) /*主キーで当てるので必ず1 OR 0になる*/ " \
         " 			FROM friends FR" \
-        " 			WHERE FR.user_id = RU.user_id" \
-        " 			AND FR.follow_user_id = RU.remove_user_id" \
+        " 			WHERE FR.user_id = user_id" \
+        " 			AND FR.follow_user_id = remove_user_id" \
         " 			AND FR.exec_id = (SELECT MAX(exec_id) FROM exec_id_manage)" \
         " 	 )" \
-        "    ,RU.update_datetime = NOW()"
+        "    ,update_datetime = NOW()"
     )
 
     con.commit()
