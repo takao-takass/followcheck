@@ -22,14 +22,9 @@ class DeleteCheckedTweets:
             log.info('削除対象のツイートIDを取得しています。')
             delete_tweets = db.execute(
                 " SELECT service_user_id, user_id, tweet_id"
-                " FROM delete_tweets ct"
-                " WHERE ct.update_datetime <= DATE_SUB(NOW(),INTERVAL 1 DAY)"
-                " AND NOT EXISTS ("
-                "     SELECT 1"
-                "     FROM keep_tweets kt"
-                "     WHERE kt.service_user_id = ct.service_user_id"
-                "     AND kt.tweet_id = ct.tweet_id"
-                " )"
+                " FROM tweets"
+                " WHERE kept = 0"
+                " AND shown = 1"
                 " LIMIT 5000"
                 , {}
             )
@@ -85,19 +80,6 @@ class DeleteCheckedTweets:
                 # tweetsの削除
                 db.execute(
                     " DELETE FROM tweets"
-                    " WHERE service_user_id = %(service_user_id)s"
-                    " AND user_id = %(user_id)s"
-                    " AND tweet_id = %(tweet_id)s"
-                    , {
-                        'service_user_id': delete_tweet['service_user_id'],
-                        'user_id': delete_tweet['user_id'],
-                        'tweet_id': delete_tweet['tweet_id'],
-                    }
-                )
-
-                # delete_tweetsの削除
-                db.execute(
-                    " DELETE FROM delete_tweets"
                     " WHERE service_user_id = %(service_user_id)s"
                     " AND user_id = %(user_id)s"
                     " AND tweet_id = %(tweet_id)s"
