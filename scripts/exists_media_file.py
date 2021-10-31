@@ -34,7 +34,7 @@ class ExistsMediaFile:
                 "       ,tm.create_datetime"
                 "       ,tm.update_datetime"
                 "       ,tm.deleted"
-                " FROM delete_tweets t"
+                " FROM tweets t"
                 " INNER JOIN tweet_medias tm"
                 " ON t.service_user_id = tm.service_user_id"
                 " AND t.user_id = tm.user_id"
@@ -44,7 +44,8 @@ class ExistsMediaFile:
                 " AND tm.user_id = lt.user_id"
                 " AND tm.tweet_id = lt.tweet_id"
                 " AND tm.url = lt.url"
-                " WHERE lt.service_user_id IS NULL",
+                " WHERE lt.service_user_id IS NULL"
+                " AND kept = 1",
                 {
                 }
             )
