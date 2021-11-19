@@ -1,9 +1,8 @@
-# followcheck batch file
-# 関連ユーザ情報更新
+#!/bin/sh
 
-LOG_YMD=`date '+%Y%m%d'`
+. ./enviroments.conf
 
-cd /opt/followcheck/scripts
-python3.7 ./update_reluser.py >> ../log/update_reluser_$LOG_YMD.log
-python3.7 ./verify_reluser.py >> ../log/update_reluser_$LOG_YMD.log
-python3.7 ./update_profileicon.py >> ../log/update_reluser_$LOG_YMD.log
+URL=$ENDPOINT'/followcheck/batch/UpdateUsers?token='$BATCH_TOKEN
+LOG=/opt/followcheck/log/update_reluser_$LOG_TIMESTAMP.log
+
+curl -X POST $URL > $LOG
