@@ -5,4 +5,11 @@ echo $ENDPOINT
 echo $BATCH_TOKEN
 echo $LOG_TIMESTAMP
 
-curl -X `$ENDPOINT'/followcheck/batch/UpdateUsers?token='$BATCH_TOKEN` > `/opt/followcheck/log/update_reluser_$LOG_TIMESTAMP.log`
+URL=`$ENDPOINT'/followcheck/batch/UpdateUsers?token='$BATCH_TOKEN`
+LOG=`/opt/followcheck/log/update_reluser_$LOG_TIMESTAMP.log`
+echo $URL
+echo $LOG
+
+
+
+curl -X $URL > $LOG
