@@ -85,7 +85,8 @@ for userStr in requestUserStrList:
                     user['description'],
                     user['profile_background_color'],
                     user['followers_count'],
-                    user['friends_count']
+                    user['friends_count'],
+                    user['location']
                 )
             )
     elif lookupRes.status_code == 404:
@@ -123,6 +124,7 @@ try:
                 " ,theme_color = '"+user.theme_color+"'"\
                 " ,follow_count = "+str(user.friends_count)+""\
                 " ,follower_count = "+str(user.followers_count)+""\
+                " ,location = "+str(user.location)+""\
                 " ,update_datetime = NOW()"\
                 " WHERE user_id = '"+user.id_str+"'"
             cursor.execute(sql)
