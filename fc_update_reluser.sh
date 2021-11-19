@@ -10,6 +10,4 @@ LOG=`/opt/followcheck/log/update_reluser_$LOG_TIMESTAMP.log`
 echo $URL
 echo $LOG
 
-
-
-curl -X $URL > $LOG
+curl -X POST $URL > $LOG
