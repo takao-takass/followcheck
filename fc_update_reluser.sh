@@ -3,6 +3,6 @@
 . ./enviroments.conf
 echo $ENDPOINT
 echo $BATCH_TOKEN
-echo $LOG_YMD
+echo $LOG_TIMESTAMP
 
-curl -X $ENDPOINT/followcheck/batch/UpdateUsers?token=$BATCH_TOKEN > /opt/followcheck/log/update_reluser_$LOG_YMD.log
+curl -X `$ENDPOINT'/followcheck/batch/UpdateUsers?token='$BATCH_TOKEN` > `/opt/followcheck/log/update_reluser_$LOG_TIMESTAMP.log`
