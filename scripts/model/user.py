@@ -1,5 +1,5 @@
 class User:
-    def __init__(self,id_str,screen_name,name,thumbnail_url,description,theme_color,followers_count,friends_count):
+    def __init__(self,id_str,screen_name,name,thumbnail_url,description,theme_color,followers_count,friends_count,location):
         self.id_str = id_str
         self.screen_name = screen_name
         self.name = name
@@ -8,3 +8,4 @@ class User:
         self.theme_color = theme_color
         self.followers_count = followers_count
         self.friends_count = friends_count
+        self.location = location
