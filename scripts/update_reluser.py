@@ -32,7 +32,7 @@ try:
     # API規制で30,000ユーザ/15min（10,000ユーザ/5min）しか情報取得できない。
     print('関連ユーザを抽出しています...')
     cursor.execute(
-        " SELECT RU.user_id "\
+        " SELECT RU.disp_name "\
         " FROM relational_users RU "\
         " WHERE RU.deleted = 0"\
         " AND RU.icecream = 0" \
@@ -41,7 +41,7 @@ try:
         " LIMIT 100"
     )
     for row in cursor:
-        relationalUserIdList.append(row['user_id'])
+        relationalUserIdList.append(row['disp_name'])
 
 except Exception as e:
     print("ERROR: ",e)
@@ -67,7 +67,7 @@ for userStr in requestUserStrList:
 
     # APIリクエスト
     params = {
-        'user_id':userStr
+        'screen_name':userStr
     }
     lookupRes = twitter.get("https://api.twitter.com/1.1/users/lookup.json", params = userStr)
 
