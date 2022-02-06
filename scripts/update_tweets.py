@@ -73,6 +73,7 @@ while requests_max > 0:
 
         # HTTP200以外のレスポンスが来たらスキップする
         if res.status_code != 200:
+            print(userId+"のAPIresponseは"+res.status_code+"でした。スキップします。")
             cursor.execute(
                 " UPDATE tweet_take_users" 
                 " SET status = '9'" 
