@@ -64,7 +64,7 @@ while requests_max > 0:
         # APIにリクエストを送信してツイートを取得する
         print(userId+"のツイートを上限200件で取得しています...")
         res = twitter.get("https://api.twitter.com/1.1/statuses/user_timeline.json", params = {
-            'screen_name': dispName,
+            'user_id': str(userId),
             'count': 200,
             'since_id': continueTweetId,
             'include_rts': False
@@ -73,7 +73,7 @@ while requests_max > 0:
 
         # HTTP200以外のレスポンスが来たらスキップする
         if res.status_code != 200:
-            print(userId+"のAPIresponseは"+res.status_code+"でした。スキップします。")
+            print(str(userId)+"のAPIresponseは"+str(res.status_code)+"でした。スキップします。")
             cursor.execute(
                 " UPDATE tweet_take_users" 
                 " SET status = '9'" 

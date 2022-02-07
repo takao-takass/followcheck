@@ -58,6 +58,7 @@ while requests_max > 0:
             'include_rts':False
         })
         if res.status_code != 200:
+            print(str(userId)+"のAPIresponseは"+str(res.status_code)+"でした。スキップします。")
             cursor.execute(
                 " UPDATE tweet_take_users" \
                 " SET status = '9'" \
