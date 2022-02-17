@@ -69,7 +69,7 @@ while requests_max > 0:
             'since_id': continueTweetId,
             'include_rts': False
         }
-        res = twitter.get("https://api.twitter.com/1.1/statuses/user_timeline.json", params)
+        res = twitter.get("https://api.twitter.com/1.1/statuses/user_timeline.json", params = params)
         print("param = " + params)
 
         # HTTP200以外のレスポンスが来たらスキップする
