@@ -66,9 +66,11 @@ while requests_max > 0:
         params = {
             'user_id': str(userId),
             'count': 200,
-            'since_id': continueTweetId,
             'include_rts': False
         }
+        if continueTweetId == '':
+            params['since_id'] = continueTweetId
+
         res = twitter.get("https://api.twitter.com/1.1/statuses/user_timeline.json", params = params)
         print("param = " + json.dumps(params))
 
