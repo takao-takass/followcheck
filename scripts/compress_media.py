@@ -54,7 +54,7 @@ class CompressMedia:
                     # 動画メディアは圧縮しない
                     if result['type'] == 'photo':
                         file_path = result['directory_path'] + result['file_name']
-                        Image.open(file_path).convert('RGB').save(file_path, quality=70)
+                        Image.open(file_path).convert('RGB').save(file_path, quality=95)
 
                     # 圧縮が完了したらキューから削除する
                     db.execute(
