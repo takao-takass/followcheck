@@ -57,19 +57,21 @@ while requests_max > 0:
             " AND A.user_id = '"+userId+"' "
             " ORDER BY A.tweeted_datetime desc LIMIT 1 "
         )
-        continueTweetId = ''
+        continueTweetId = '10000'
         for row in cursor:
             continueTweetId= row['tweet_id']
 
         # APIにリクエストを送信してツイートを取得する
         print(userId+"のツイートを上限200件で取得しています...")
-        res = twitter.get("https://api.twitter.com/1.1/statuses/user_timeline.json", params = {
+        params = {
             'user_id': str(userId),
             'count': 200,
             'since_id': continueTweetId,
             'include_rts': False
-        })
-        statuses = json.loads(res.text)
+        }
+
+        res = twitter.get("https://api.twitter.com/1.1/statuses/user_timeline.json", params = params)
+        print("param = " + json.dumps(params))
 
         # HTTP200以外のレスポンスが来たらスキップする
         if res.status_code != 200:
@@ -90,6 +92,7 @@ while requests_max > 0:
         tweets = []
         tweetMedias = []
         other_user_id = []
+        statuses = json.loads(res.text)
         for statuse in statuses:
             # ツイートの本文
             tweets.append({
