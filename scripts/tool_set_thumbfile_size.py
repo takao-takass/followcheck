@@ -28,26 +28,30 @@ class SetFileSize:
 
             for filesize_empty_meadia in filesize_empty_meadias:
 
-                file_path = filesize_empty_meadia['thumb_directory_path'] + filesize_empty_meadia['thumb_file_name']
-                file_size = -1
-                if os.path.exists(file_path):
-                    file_size = os.path.getsize(file_path)
+                try:
+                    file_path = filesize_empty_meadia['thumb_directory_path'] + filesize_empty_meadia['thumb_file_name']
+                    file_size = -1
+                    if os.path.exists(file_path):
+                        file_size = os.path.getsize(file_path)
 
-                db.execute(
-                    " UPDATE tweet_medias "
-                    " SET thumb_file_size = %(file_size)s "
-                    " WHERE service_user_id = %(service_user_id)s "
-                    " AND user_id = %(user_id)s "
-                    " AND tweet_id = %(tweet_id)s "
-                    " AND url = %(url)s ",
-                    {
-                        'file_size' : file_size,
-                        'service_user_id' : filesize_empty_meadia['service_user_id'],
-                        'user_id' : filesize_empty_meadia['user_id'],
-                        'tweet_id' : filesize_empty_meadia['tweet_id'],
-                        'url' : filesize_empty_meadia['url']
-                    }
-                )
+                    db.execute(
+                        " UPDATE tweet_medias "
+                        " SET thumb_file_size = %(file_size)s "
+                        " WHERE service_user_id = %(service_user_id)s "
+                        " AND user_id = %(user_id)s "
+                        " AND tweet_id = %(tweet_id)s "
+                        " AND url = %(url)s ",
+                        {
+                            'file_size' : file_size,
+                            'service_user_id' : filesize_empty_meadia['service_user_id'],
+                            'user_id' : filesize_empty_meadia['user_id'],
+                            'tweet_id' : filesize_empty_meadia['tweet_id'],
+                            'url' : filesize_empty_meadia['url']
+                        }
+                    )
+                
+                except Exception as e:
+                    log.error(e)
 
             if len(filesize_empty_meadias) > 0:
                 db.commit()
