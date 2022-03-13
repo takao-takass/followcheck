@@ -34,7 +34,7 @@ class SetFileSize:
                     file_size = os.path.getsize(file_path)
 
                 db.execute(
-                    " UPDATE followcheck.tweet_medias "
+                    " UPDATE tweet_medias "
                     " SET file_size = %(file_size)d "
                     " WHERE service_user_id = %(service_user_id)s "
                     " AND user_id = %(user_id)s "
