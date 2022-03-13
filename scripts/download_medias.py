@@ -82,10 +82,12 @@ class DownloadMedias:
                     with open(directory_path + file_name, mode="wb") as f:
                         f.write(data)
 
+                    file_size = os.path.getsize(directory_path + file_name)
                     db.execute(
                         " UPDATE tweet_medias"
                         " SET file_name = %(file_name)s"
                         "    ,directory_path = %(directory_path)s"
+                        "    ,file_size = %(file_size)s"
                         " WHERE service_user_id = %(service_user_id)s"
                         " AND user_id = %(user_id)s"
                         " AND tweet_id = %(tweet_id)s"
@@ -93,6 +95,7 @@ class DownloadMedias:
                         , {
                             'file_name': file_name,
                             'directory_path': directory_path,
+                            'file_size' : file_size,
                             'service_user_id': download_media['service_user_id'],
                             'user_id': download_media['user_id'],
                             'tweet_id': download_media['tweet_id'],

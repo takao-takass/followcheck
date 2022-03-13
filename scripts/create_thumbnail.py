@@ -131,11 +131,13 @@ class CreateThumbnail:
 
                     # データベースにサムネイル情報を登録し、キューからレコードを削除する
                     log.info(" -> データベースにサムネイル情報を登録しています...")
+                    file_size = os.path.getsize(storage_path + thumb_name)
                     db.execute(
                         " UPDATE tweet_medias"
                         " SET thumb_file_name = %(thumb_name)s"
-                        " ,thumb_directory_path = %(storage_path)s"
-                        " ,update_datetime = NOW()"
+                        "    ,thumb_directory_path = %(storage_path)s"
+                        "    ,thumb_file_size = %(file_size)s"
+                        "    ,update_datetime = NOW()"
                         " WHERE service_user_id = %(service_user_id)s"
                         " AND user_id = %(user_id)s"
                         " AND tweet_id = %(tweet_id)s"
@@ -143,6 +145,7 @@ class CreateThumbnail:
                         {
                             'thumb_name': thumb_name,
                             'storage_path': storage_path,
+                            'file_size': file_size,
                             'service_user_id': result['service_user_id'],
                             'user_id': result['user_id'],
                             'tweet_id': result['tweet_id'],
