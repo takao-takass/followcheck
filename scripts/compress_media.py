@@ -1,3 +1,4 @@
+import os
 import sys, hashlib, config, cv2
 from PIL import Image
 from classes import logger, thread, databeses, exceptions
@@ -55,6 +56,24 @@ class CompressMedia:
                     if result['type'] == 'photo':
                         file_path = result['directory_path'] + result['file_name']
                         Image.open(file_path).convert('RGB').save(file_path, quality=95)
+
+                        file_size = os.path.getsize(file_path)
+                        db.execute(
+                            " UPDATE tweet_medias"
+                            " SET file_size = %(file_size)d"
+                            " WHERE service_user_id = %(service_user_id)s"
+                            " AND user_id = %(user_id)s"
+                            " AND tweet_id = %(tweet_id)s"
+                            " AND url = %(url)s"
+                            , {
+                                'file_size' : file_size,
+                                'service_user_id' : result['service_user_id'],
+                                'user_id' : result['user_id'],
+                                'tweet_id' : result['tweet_id'],
+                                'url' : result['url']
+                            }
+                        )
+
 
                     # 圧縮が完了したらキューから削除する
                     db.execute(
