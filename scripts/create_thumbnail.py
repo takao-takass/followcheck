@@ -136,7 +136,7 @@ class CreateThumbnail:
                         " UPDATE tweet_medias"
                         " SET thumb_file_name = %(thumb_name)s"
                         "    ,thumb_directory_path = %(storage_path)s"
-                        "    ,thumb_file_size = %(file_size)d"
+                        "    ,thumb_file_size = %(file_size)s"
                         "    ,update_datetime = NOW()"
                         " WHERE service_user_id = %(service_user_id)s"
                         " AND user_id = %(user_id)s"

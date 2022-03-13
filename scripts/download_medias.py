@@ -87,7 +87,7 @@ class DownloadMedias:
                         " UPDATE tweet_medias"
                         " SET file_name = %(file_name)s"
                         "    ,directory_path = %(directory_path)s"
-                        "    ,file_size = %(file_size)d"
+                        "    ,file_size = %(file_size)s"
                         " WHERE service_user_id = %(service_user_id)s"
                         " AND user_id = %(user_id)s"
                         " AND tweet_id = %(tweet_id)s"

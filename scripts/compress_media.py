@@ -60,7 +60,7 @@ class CompressMedia:
                         file_size = os.path.getsize(file_path)
                         db.execute(
                             " UPDATE tweet_medias"
-                            " SET file_size = %(file_size)d"
+                            " SET file_size = %(file_size)s"
                             " WHERE service_user_id = %(service_user_id)s"
                             " AND user_id = %(user_id)s"
                             " AND tweet_id = %(tweet_id)s"
