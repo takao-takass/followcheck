@@ -35,6 +35,17 @@ requests_max = 200
 while requests_max > 0:
 
     try:
+        con = MySQLdb.connect(
+            host = config.DB_HOST,
+            port = config.DB_PORT,
+            db = config.DB_DATABASE,
+            user = config.DB_USER,
+            passwd = config.DB_PASSWORD,
+            charset = config.DB_CHARSET
+        )
+        con.autocommit(False)
+        cursor = con.cursor(MySQLdb.cursors.DictCursor)
+
         # 対象のユーザを取得する
         print("ツイート取得対象のユーザを確認しています...")
         cursor.execute(
