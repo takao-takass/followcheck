@@ -8,22 +8,31 @@ AT = config.ACCESS_TOKEN
 ATS = config.ACCESS_TOKEN_SECRET
 twitter = OAuth1Session(CK, CS, AT, ATS) #認証処理
 
+con = MySQLdb.connect(
+    host = config.DB_HOST,
+    port = config.DB_PORT,
+    db = config.DB_DATABASE,
+    user = config.DB_USER,
+    passwd = config.DB_PASSWORD,
+    charset = config.DB_CHARSET
+)
+con.autocommit(False)
+cursor = con.cursor(MySQLdb.cursors.DictCursor)
+
+# 優先ユーザは毎回ツイートを取得させる
+cursor.execute(
+    " UPDATE tweet_take_users "
+    " SET status = '5' "
+    "    ,update_datetime = NOW() "
+    " WHERE status = '9'"
+    " AND high_priority = 1"
+)
+con.commit()
+
 # リクエスト送信回数の上限
 # API上限 1500/15min、3min周期で実行する想定。
 requests_max = 200
-
 while requests_max > 0:
-
-    con = MySQLdb.connect(
-        host = config.DB_HOST,
-        port = config.DB_PORT,
-        db = config.DB_DATABASE,
-        user = config.DB_USER,
-        passwd = config.DB_PASSWORD,
-        charset = config.DB_CHARSET
-    )
-    con.autocommit(False)
-    cursor = con.cursor(MySQLdb.cursors.DictCursor)
 
     try:
         # 対象のユーザを取得する
@@ -36,7 +45,7 @@ while requests_max > 0:
             " WHERE A.status IN ('5','6') "
             " AND B.icecream = 0"
             " AND A.not_tweeted_longtime = 0"
-            " ORDER BY A.status desc LIMIT 1 "
+            " ORDER BY A.high_priority desc, A.status desc LIMIT 1 "
         )
 
         if cursor.rowcount == 0:

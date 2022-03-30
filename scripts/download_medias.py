@@ -7,7 +7,6 @@ import urllib.request
 from PIL import Image
 from classes import logger, thread, databeses, exceptions
 
-
 class DownloadMedias:
 
     @staticmethod
@@ -30,6 +29,20 @@ class DownloadMedias:
                 " WHERE `status` = 0"
                 " AND thread_id IS NULL "
                 " LIMIT 5000"
+                , {
+                    'thread_id': thread_id
+                }
+            )
+            db.execute(
+                " UPDATE queue_download_medias"
+                " SET thread_id = %(thread_id)s"
+                " WHERE status = 0"
+                " AND thread_id IS NULL"
+                " AND (service_user_id, user_id) IN ("
+                "     SELECT service_user_id, user_id"
+                "     FROM tweet_take_users"
+                "     WHERE `high_priority` = 1"
+                " )"
                 , {
                     'thread_id': thread_id
                 }
