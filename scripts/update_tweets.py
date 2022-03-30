@@ -25,7 +25,7 @@ cursor.execute(
     " SET status = '5' "
     "    ,update_datetime = NOW() "
     " WHERE status = '9'"
-    " AND high_priority = 1"
+    " AND `high_priority` = 1"
 )
 con.commit()
 
